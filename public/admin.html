@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Matrimonio</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #fdf6ee; --cream: #f2e8d9; --charcoal: #2a2420;
+  --rust: #b5451b; --rust-light: #d4724a; --amber: #c98a2e; --amber-light: #e8c06a;
+  --forest: #2d4a3e; --navy: #1e2d4a;
+  --text-dark: #2a2420; --text-mid: #6b5f57;
+}
+body { font-family: 'Josefin Sans', sans-serif; font-weight: 300; background: var(--bg); color: var(--text-dark); }
+
+/* ── Login ── */
+.login-wrap {
+  display: flex; align-items: center; justify-content: center; min-height: 100vh;
+}
+.login-box {
+  background: #fff; padding: 3rem 2.5rem; border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 360px; text-align: center;
+}
+.login-box h2 { font-family: 'Josefin Sans', sans-serif; font-weight: 400; margin-bottom: 1.5rem; font-size: 1.2rem; }
+.login-box input {
+  width: 100%; padding: 0.6rem 0.8rem; margin-bottom: 0.8rem;
+  border: 1px solid rgba(201,138,46,0.3); background: var(--bg);
+  font-family: 'Josefin Sans', sans-serif; font-size: 0.85rem;
+}
+.login-box button { width: 100%; }
+.login-err { color: var(--rust); font-size: 0.8rem; margin-top: 0.5rem; }
+
+/* ── Layout ── */
+.admin-wrap { display: none; }
+.admin-header {
+  background: var(--charcoal); color: #fff; padding: 1rem 1.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.admin-header h1 { font-size: 1rem; font-weight: 400; }
+.admin-header a, .admin-header button {
+  color: var(--amber-light); background: none; border: none;
+  font-family: 'Josefin Sans', sans-serif; font-size: 0.75rem; cursor: pointer;
+  text-decoration: none; margin-left: 1rem;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex; flex-wrap: wrap; border-bottom: 2px solid var(--cream);
+  background: #fff; position: sticky; top: 0; z-index: 10;
+}
+.tab-btn {
+  padding: 0.8rem 1.2rem; background: none; border: none; cursor: pointer;
+  font-family: 'Josefin Sans', sans-serif; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-mid);
+  border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.3s;
+}
+.tab-btn.active { color: var(--rust); border-bottom-color: var(--rust); }
+.tab-panel { display: none; padding: 2rem 1.5rem; max-width: 1000px; margin: 0 auto; }
+.tab-panel.active { display: block; }
+
+/* ── Shared form elements ── */
+.form-group { margin-bottom: 1rem; }
+.form-group label {
+  display: block; font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--text-mid); margin-bottom: 0.2rem;
+}
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%; padding: 0.5rem 0.7rem; border: 1px solid rgba(201,138,46,0.3);
+  background: #fff; font-family: 'Josefin Sans', sans-serif; font-size: 0.85rem;
+  border-radius: 2px;
+}
+.form-group textarea { min-height: 80px; resize: vertical; }
+
+.btn {
+  padding: 0.5rem 1.2rem; border: 1px solid var(--amber); color: var(--amber);
+  background: none; font-family: 'Josefin Sans', sans-serif; font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
+  transition: all 0.3s; border-radius: 2px;
+}
+.btn:hover { background: var(--amber); color: var(--charcoal); }
+.btn-danger { border-color: var(--rust); color: var(--rust); }
+.btn-danger:hover { background: var(--rust); color: #fff; }
+.btn-sm { padding: 0.3rem 0.6rem; font-size: 0.6rem; }
+
+/* ── Stats cards ── */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.stat-card {
+  background: #fff; padding: 1.2rem; text-align: center; border-radius: 4px;
+  border: 1px solid rgba(201,138,46,0.2);
+}
+.stat-num { font-size: 1.8rem; font-weight: 400; color: var(--rust); }
+.stat-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-mid); }
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th { text-align: left; padding: 0.6rem; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-mid); border-bottom: 2px solid var(--cream); }
+td { padding: 0.6rem; border-bottom: 1px solid var(--cream); }
+.badge {
+  display: inline-block; padding: 0.15rem 0.5rem; font-size: 0.6rem;
+  text-transform: uppercase; border-radius: 2px;
+}
+.badge-ok { background: rgba(45,74,62,0.1); color: var(--forest); }
+.badge-wait { background: rgba(201,138,46,0.1); color: var(--amber); }
+
+/* ── Toolbar ── */
+.toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+
+/* ── Photo grid ── */
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+.photo-card {
+  background: #fff; border: 1px solid rgba(201,138,46,0.2); border-radius: 4px; overflow: hidden;
+}
+.photo-card img { width: 100%; height: 150px; object-fit: cover; }
+.photo-card-body { padding: 0.8rem; }
+.photo-card-body input { width: 100%; margin-bottom: 0.5rem; font-size: 0.8rem; padding: 0.3rem; border: 1px solid var(--cream); font-family: 'Josefin Sans', sans-serif; }
+.photo-actions { display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center; }
+.photo-actions label { font-size: 0.65rem; color: var(--text-mid); }
+
+/* ── Upload zone ── */
+.upload-zone {
+  border: 2px dashed rgba(201,138,46,0.4); padding: 2rem; text-align: center;
+  margin-bottom: 1.5rem; border-radius: 4px; cursor: pointer;
+  transition: border-color 0.3s, background 0.3s;
+}
+.upload-zone.dragover { border-color: var(--amber); background: rgba(201,138,46,0.05); }
+.upload-zone p { font-size: 0.85rem; color: var(--text-mid); }
+
+/* ── Item row (timeline/location) ── */
+.item-row {
+  background: #fff; border: 1px solid rgba(201,138,46,0.2); padding: 1rem;
+  margin-bottom: 0.8rem; border-radius: 4px;
+  display: grid; grid-template-columns: 1fr 1fr 2fr auto; gap: 0.8rem; align-items: end;
+}
+.item-row.loc-row { grid-template-columns: 60px 1fr 1fr 1fr 1fr auto; }
+.item-row input, .item-row textarea {
+  padding: 0.4rem; font-size: 0.8rem; border: 1px solid var(--cream);
+  font-family: 'Josefin Sans', sans-serif; width: 100%;
+}
+.item-actions { display: flex; gap: 0.3rem; }
+
+/* ── Switch toggle ── */
+.switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; inset: 0; background: var(--cream); border-radius: 22px;
+  cursor: pointer; transition: background 0.3s;
+}
+.slider::before {
+  content: ''; position: absolute; width: 16px; height: 16px;
+  left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: transform 0.3s;
+}
+.switch input:checked + .slider { background: var(--amber); }
+.switch input:checked + .slider::before { transform: translateX(18px); }
+
+/* ── Settings groups ── */
+.settings-group { margin-bottom: 2rem; }
+.settings-group h3 { font-size: 0.9rem; font-weight: 400; margin-bottom: 1rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--cream); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* ── Danger zone ── */
+.danger-zone {
+  margin-top: 2rem; padding: 1.5rem; border: 1px solid var(--rust);
+  border-radius: 4px; background: rgba(181,69,27,0.03);
+}
+.danger-zone h4 { color: var(--rust); font-size: 0.8rem; font-weight: 400; margin-bottom: 0.5rem; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--charcoal);
+  color: #fff; padding: 0.8rem 1.5rem; border-radius: 4px; font-size: 0.8rem;
+  transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 9999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+@media (max-width: 600px) {
+  .item-row, .item-row.loc-row { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <h2>Area Sposi</h2>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button class="btn" onclick="doLogin()" style="width:100%">Accedi</button>
+    <p class="login-err" id="loginErr"></p>
+  </div>
+</div>
+
+<!-- ── Admin panel ── -->
+<div class="admin-wrap" id="adminWrap">
+  <div class="admin-header">
+    <h1>Pannello Admin</h1>
+    <div>
+      <a href="/" target="_blank">Vedi sito</a>
+      <button onclick="doLogout()">Esci</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="invitati">Invitati</button>
+    <button class="tab-btn" data-tab="testi">Testi & Contenuti</button>
+    <button class="tab-btn" data-tab="foto">Foto</button>
+    <button class="tab-btn" data-tab="programma">Programma</button>
+    <button class="tab-btn" data-tab="locations">Location</button>
+    <button class="tab-btn" data-tab="impostazioni">Impostazioni</button>
+  </div>
+
+  <!-- ═══ TAB 1: Invitati ═══ -->
+  <div class="tab-panel active" id="panel-invitati">
+    <div class="stats" id="guestStats"></div>
+
+    <h3 style="font-weight:400;margin-bottom:1rem;">Aggiungi invitato</h3>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <input type="text" id="addNome" placeholder="Nome" style="flex:1;min-width:120px;padding:0.5rem;border:1px solid rgba(201,138,46,0.3);font-family:'Josefin Sans',sans-serif;">
+      <input type="text" id="addCognome" placeholder="Cognome" style="flex:1;min-width:120px;padding:0.5rem;border:1px solid rgba(201,138,46,0.3);font-family:'Josefin Sans',sans-serif;">
+      <button class="btn" onclick="addGuest()">Aggiungi</button>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-sm" onclick="document.getElementById('csvInput').click()">Importa CSV</button>
+      <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="importCSV(this)">
+      <button class="btn btn-sm" onclick="document.getElementById('matComInput').click()" style="border-color:var(--rust);color:var(--rust);">Importa da Matrimonio.com</button>
+      <input type="file" id="matComInput" accept=".csv,.tsv,.txt,.xls" style="display:none" onchange="importMatrimonioCom(this)">
+      <button class="btn btn-sm" onclick="exportGuests('all')">Esporta tutto</button>
+      <button class="btn btn-sm" onclick="exportGuests('confirmed')">Esporta confermati</button>
+      <button class="btn btn-sm btn-danger" onclick="clearGuests()">Svuota lista</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nome</th><th>Cognome</th><th>Gruppo</th><th>Tavolo</th><th>Presenza</th><th>Note</th><th>Azioni</th></tr></thead>
+        <tbody id="guestTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 2: Testi & Contenuti ═══ -->
+  <div class="tab-panel" id="panel-testi">
+    <div class="settings-group">
+      <h3>Generale</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Nome sposa</label><input id="s_sposi_nome1"></div>
+        <div class="form-group"><label>Nome sposo</label><input id="s_sposi_nome2"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Cognome sposa</label><input id="s_cognome1"></div>
+        <div class="form-group"><label>Cognome sposo</label><input id="s_cognome2"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Data matrimonio</label><input type="datetime-local" id="s_data_matrimonio"></div>
+        <div class="form-group"><label>Data display</label><input id="s_data_display"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Location display</label><input id="s_location_display"></div>
+        <div class="form-group"><label>Hero pretitle</label><input id="s_hero_pretitle"></div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Sezione Storia</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Label</label><input id="s_storia_label"></div>
+        <div class="form-group"><label>Titolo</label><input id="s_storia_title"></div>
+      </div>
+      <div class="form-group"><label>Testo</label><textarea id="s_storia_testo"></textarea></div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Sezione Programma</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Label</label><input id="s_programma_label"></div>
+        <div class="form-group"><label>Titolo</label><input id="s_programma_title"></div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Sezione Location</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Label</label><input id="s_location_label"></div>
+        <div class="form-group"><label>Titolo</label><input id="s_location_title"></div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Sezione Regalo</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Label</label><input id="s_regalo_label"></div>
+        <div class="form-group"><label>Titolo</label><input id="s_regalo_title"></div>
+      </div>
+      <div class="form-group"><label>Testo introduttivo</label><textarea id="s_regalo_testo"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Intestatario conto</label><input id="s_regalo_intestatario"></div>
+        <div class="form-group"><label>IBAN</label><input id="s_regalo_iban"></div>
+      </div>
+      <div class="form-group"><label>Nota sotto</label><input id="s_regalo_note"></div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Sezione RSVP</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Label</label><input id="s_rsvp_label"></div>
+        <div class="form-group"><label>Titolo</label><input id="s_rsvp_title"></div>
+      </div>
+      <div class="form-group"><label>Testo introduttivo</label><textarea id="s_rsvp_testo"></textarea></div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Footer</h3>
+      <div class="form-group"><label>Testo footer</label><input id="s_footer_testo"></div>
+    </div>
+
+    <button class="btn" onclick="saveAllSettings()">Salva tutto</button>
+  </div>
+
+  <!-- ═══ TAB 3: Foto ═══ -->
+  <div class="tab-panel" id="panel-foto">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+      <label style="font-size:0.8rem;color:var(--text-mid);">Mostra carousel nel sito</label>
+      <label class="switch">
+        <input type="checkbox" id="carouselToggle" onchange="toggleCarousel(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="upload-zone" id="uploadZone">
+      <p>Trascina le foto qui oppure clicca per caricare</p>
+      <input type="file" id="fileInput" multiple accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
+    </div>
+
+    <div class="photo-grid" id="photoGrid"></div>
+  </div>
+
+  <!-- ═══ TAB 4: Programma ═══ -->
+  <div class="tab-panel" id="panel-programma">
+    <div id="timelineItems"></div>
+    <h3 style="font-weight:400;margin:1.5rem 0 1rem;">Aggiungi evento</h3>
+    <div class="item-row">
+      <div class="form-group"><label>Ora</label><input id="newTlOra" placeholder="14:00"></div>
+      <div class="form-group"><label>Titolo</label><input id="newTlTitolo" placeholder="Evento"></div>
+      <div class="form-group"><label>Descrizione</label><input id="newTlDesc" placeholder="Descrizione"></div>
+      <button class="btn" onclick="addTimeline()" style="align-self:end;">Aggiungi</button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 5: Location ═══ -->
+  <div class="tab-panel" id="panel-locations">
+    <div id="locationItems"></div>
+    <h3 style="font-weight:400;margin:1.5rem 0 1rem;">Aggiungi location</h3>
+    <div class="item-row loc-row">
+      <div class="form-group"><label>Icona</label><input id="newLocIcona" value="📍" style="text-align:center;font-size:1.2rem;"></div>
+      <div class="form-group"><label>Titolo card</label><input id="newLocTitolo"></div>
+      <div class="form-group"><label>Nome luogo</label><input id="newLocNome"></div>
+      <div class="form-group"><label>Indirizzo</label><input id="newLocIndirizzo"></div>
+      <div class="form-group"><label>URL Maps</label><input id="newLocMaps"></div>
+      <button class="btn" onclick="addLocation()" style="align-self:end;">Aggiungi</button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 6: Impostazioni ═══ -->
+  <div class="tab-panel" id="panel-impostazioni">
+    <div class="settings-group">
+      <h3>Cambia password admin</h3>
+      <div class="form-group"><label>Password attuale</label><input type="password" id="oldPass"></div>
+      <div class="form-group"><label>Nuova password</label><input type="password" id="newPass1"></div>
+      <div class="form-group"><label>Conferma nuova password</label><input type="password" id="newPass2"></div>
+      <button class="btn" onclick="changePassword()">Cambia password</button>
+    </div>
+
+    <div class="danger-zone">
+      <h4>Zona pericolosa</h4>
+      <p style="font-size:0.8rem;color:var(--text-mid);margin-bottom:1rem;">Queste azioni sono irreversibili.</p>
+      <button class="btn btn-danger" onclick="clearGuests()">Elimina tutti gli invitati</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let settings = {};
+let guests = [];
+let photos = [];
+let timelineData = [];
+let locationsData = [];
+
+// ── Helpers ──
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+async function api(url, opts = {}) {
+  if (opts.body && !(opts.body instanceof FormData)) {
+    opts.headers = { 'Content-Type': 'application/json', ...opts.headers };
+    opts.body = JSON.stringify(opts.body);
+  }
+  const res = await fetch(API + url, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Errore');
+  }
+  return res.json();
+}
+
+// ── Auth ──
+async function checkAuth() {
+  try {
+    await api('/admin/me');
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminWrap').style.display = 'block';
+    loadAll();
+  } catch { /* show login */ }
+}
+
+async function doLogin() {
+  try {
+    await api('/admin/login', {
+      method: 'POST',
+      body: { username: document.getElementById('loginUser').value, password: document.getElementById('loginPass').value }
+    });
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminWrap').style.display = 'block';
+    loadAll();
+  } catch (e) {
+    document.getElementById('loginErr').textContent = e.message;
+  }
+}
+
+async function doLogout() {
+  await api('/admin/logout', { method: 'POST' });
+  location.reload();
+}
+
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ── Load all data ──
+async function loadAll() {
+  [settings, guests, photos, timelineData, locationsData] = await Promise.all([
+    api('/settings'), api('/guests'), api('/photos'), api('/timeline'), api('/locations')
+  ]);
+  renderGuestStats();
+  renderGuestTable();
+  populateSettingsForm();
+  renderPhotos();
+  renderTimeline();
+  renderLocations();
+  document.getElementById('carouselToggle').checked = settings.carousel_visibile !== '0';
+}
+
+// ── Tabs ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════
+// TAB 1 — INVITATI
+// ═══════════════════════════════
+
+function renderGuestStats() {
+  const total = guests.length;
+  const confirmed = guests.filter(g => g.confermato).length;
+  const pending = total - confirmed;
+  const withNotes = guests.filter(g => g.note && g.note.trim()).length;
+  document.getElementById('guestStats').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Totale</div></div>
+    <div class="stat-card"><div class="stat-num">${confirmed}</div><div class="stat-label">Confermati</div></div>
+    <div class="stat-card"><div class="stat-num">${pending}</div><div class="stat-label">In attesa</div></div>
+    <div class="stat-card"><div class="stat-num">${withNotes}</div><div class="stat-label">Con note</div></div>
+  `;
+}
+
+function renderGuestTable() {
+  const tbody = document.getElementById('guestTableBody');
+  tbody.innerHTML = guests.map((g, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${esc(g.nome)}</td>
+      <td>${esc(g.cognome)}</td>
+      <td style="font-size:0.8rem;color:var(--text-mid)">${esc(g.gruppo || '')}</td>
+      <td style="font-size:0.8rem;color:var(--text-mid)">${esc(g.tavolo || '')}</td>
+      <td><span class="badge ${g.confermato ? 'badge-ok' : 'badge-wait'}">${g.confermato ? 'Confermato' : 'In attesa'}</span></td>
+      <td style="font-size:0.8rem;color:var(--text-mid)">${esc(g.note || '')}</td>
+      <td>
+        <button class="btn btn-sm" onclick="toggleConfirm(${g.id}, ${g.confermato ? 0 : 1})">${g.confermato ? '✗' : '✓'}</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteGuest(${g.id})">🗑</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function addGuest() {
+  const nome = document.getElementById('addNome').value.trim();
+  const cognome = document.getElementById('addCognome').value.trim();
+  if (!nome || !cognome) return;
+  await api('/guests', { method: 'POST', body: { nome, cognome } });
+  document.getElementById('addNome').value = '';
+  document.getElementById('addCognome').value = '';
+  guests = await api('/guests');
+  renderGuestStats(); renderGuestTable();
+  toast('Invitato aggiunto');
+}
+
+async function toggleConfirm(id, val) {
+  await api(`/guests/${id}`, { method: 'PATCH', body: { confermato: val } });
+  guests = await api('/guests');
+  renderGuestStats(); renderGuestTable();
+}
+
+async function deleteGuest(id) {
+  if (!confirm('Eliminare questo invitato?')) return;
+  await api(`/guests/${id}`, { method: 'DELETE' });
+  guests = await api('/guests');
+  renderGuestStats(); renderGuestTable();
+  toast('Invitato eliminato');
+}
+
+async function clearGuests() {
+  if (!confirm('Eliminare TUTTI gli invitati?')) return;
+  if (!confirm('Sei sicuro? Questa azione è irreversibile.')) return;
+  await api('/guests', { method: 'DELETE', body: { confirm: true } });
+  guests = await api('/guests');
+  renderGuestStats(); renderGuestTable();
+  toast('Lista svuotata');
+}
+
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const lines = e.target.result.split('\n').map(l => l.trim()).filter(l => l);
+    const guestList = [];
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(',').map(p => p.trim().replace(/^"|"$/g, ''));
+      if (parts.length >= 2 && parts[0] && parts[1]) {
+        guestList.push({ nome: parts[0], cognome: parts[1] });
+      }
+    }
+    if (guestList.length) {
+      await api('/guests', { method: 'POST', body: guestList });
+      guests = await api('/guests');
+      renderGuestStats(); renderGuestTable();
+      toast(`${guestList.length} invitati importati`);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function importMatrimonioCom(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const res = await api('/guests/import-matrimoniocom', {
+        method: 'POST',
+        body: { data: e.target.result }
+      });
+      guests = await api('/guests');
+      renderGuestStats(); renderGuestTable();
+      toast(`${res.count} invitati importati da Matrimonio.com`);
+    } catch (err) {
+      toast('Errore: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function exportGuests(type) {
+  const list = type === 'confirmed' ? guests.filter(g => g.confermato) : guests;
+  const csv = 'Nome,Cognome,Email,Telefono,Cellulare,Gruppo,Confermato,Menu,Indirizzo,CAP,Citta,Provincia,Tavolo,Sesso,Note\n' +
+    list.map(g => [g.nome,g.cognome,g.email||'',g.telefono||'',g.cellulare||'',g.gruppo||'',g.confermato?'Si':'No',g.menu||'',g.indirizzo||'',g.cap||'',g.citta||'',g.provincia||'',g.tavolo||'',g.sesso||'',g.note||'']
+      .map(v => `"${String(v).replace(/"/g, '""')}"`)
+      .join(',')
+    ).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = type === 'confirmed' ? 'invitati_confermati.csv' : 'invitati.csv';
+  a.click();
+}
+
+// ═══════════════════════════════
+// TAB 2 — TESTI & CONTENUTI
+// ═══════════════════════════════
+
+const settingsKeys = [
+  'sposi_nome1','sposi_nome2','cognome1','cognome2','data_matrimonio','data_display',
+  'location_display','hero_pretitle','storia_label','storia_title','storia_testo',
+  'programma_label','programma_title','location_label','location_title',
+  'regalo_label','regalo_title','regalo_testo','regalo_intestatario','regalo_iban','regalo_note',
+  'rsvp_label','rsvp_title','rsvp_testo','footer_testo'
+];
+
+function populateSettingsForm() {
+  settingsKeys.forEach(k => {
+    const el = document.getElementById('s_' + k);
+    if (el) el.value = settings[k] || '';
+  });
+}
+
+async function saveAllSettings() {
+  const obj = {};
+  settingsKeys.forEach(k => {
+    const el = document.getElementById('s_' + k);
+    if (el) obj[k] = el.value;
+  });
+  await api('/admin/settings', { method: 'POST', body: obj });
+  settings = await api('/settings');
+  toast('Impostazioni salvate');
+}
+
+// ═══════════════════════════════
+// TAB 3 — FOTO
+// ═══════════════════════════════
+
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  uploadFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', () => { uploadFiles(fileInput.files); fileInput.value = ''; });
+
+async function uploadFiles(files) {
+  for (const file of files) {
+    const fd = new FormData();
+    fd.append('photo', file);
+    await fetch(API + '/photos', { method: 'POST', body: fd });
+  }
+  photos = await api('/photos');
+  renderPhotos();
+  toast(`${files.length} foto caricate`);
+}
+
+function renderPhotos() {
+  const grid = document.getElementById('photoGrid');
+  grid.innerHTML = photos.map(p => `
+    <div class="photo-card">
+      <img src="${p.url}" alt="">
+      <div class="photo-card-body">
+        <input value="${esc(p.caption || '')}" placeholder="Didascalia..."
+          onchange="updatePhoto(${p.id}, {caption: this.value})">
+        <div class="photo-actions">
+          <label><input type="radio" name="hero" ${p.is_hero ? 'checked' : ''}
+            onchange="updatePhoto(${p.id}, {is_hero: true})"> Hero</label>
+          <button class="btn btn-sm" onclick="movePhoto(${p.id}, -1)">↑</button>
+          <button class="btn btn-sm" onclick="movePhoto(${p.id}, 1)">↓</button>
+          <button class="btn btn-sm btn-danger" onclick="deletePhoto(${p.id})">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function updatePhoto(id, fields) {
+  await api(`/photos/${id}`, { method: 'PATCH', body: fields });
+  photos = await api('/photos');
+  renderPhotos();
+}
+
+async function movePhoto(id, dir) {
+  const idx = photos.findIndex(p => p.id === id);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= photos.length) return;
+  // Swap sort_orders
+  await api(`/photos/${photos[idx].id}`, { method: 'PATCH', body: { sort_order: photos[newIdx].sort_order } });
+  await api(`/photos/${photos[newIdx].id}`, { method: 'PATCH', body: { sort_order: photos[idx].sort_order } });
+  photos = await api('/photos');
+  renderPhotos();
+}
+
+async function deletePhoto(id) {
+  if (!confirm('Eliminare questa foto?')) return;
+  await api(`/photos/${id}`, { method: 'DELETE' });
+  photos = await api('/photos');
+  renderPhotos();
+  toast('Foto eliminata');
+}
+
+async function toggleCarousel(on) {
+  await api('/admin/settings', { method: 'POST', body: { carousel_visibile: on ? '1' : '0' } });
+  settings.carousel_visibile = on ? '1' : '0';
+  toast(on ? 'Carousel attivato' : 'Carousel disattivato');
+}
+
+// ═══════════════════════════════
+// TAB 4 — PROGRAMMA
+// ═══════════════════════════════
+
+function renderTimeline() {
+  const container = document.getElementById('timelineItems');
+  container.innerHTML = timelineData.map(t => `
+    <div class="item-row">
+      <div class="form-group"><label>Ora</label><input value="${esc(t.ora)}" id="tl_ora_${t.id}"></div>
+      <div class="form-group"><label>Titolo</label><input value="${esc(t.titolo)}" id="tl_tit_${t.id}"></div>
+      <div class="form-group"><label>Descrizione</label><input value="${esc(t.descrizione || '')}" id="tl_desc_${t.id}"></div>
+      <div class="item-actions" style="align-self:end;">
+        <button class="btn btn-sm" onclick="saveTimeline(${t.id})">Salva</button>
+        <button class="btn btn-sm" onclick="moveTimeline(${t.id}, -1)">↑</button>
+        <button class="btn btn-sm" onclick="moveTimeline(${t.id}, 1)">↓</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteTimeline(${t.id})">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function saveTimeline(id) {
+  const ora = document.getElementById(`tl_ora_${id}`).value;
+  const titolo = document.getElementById(`tl_tit_${id}`).value;
+  const descrizione = document.getElementById(`tl_desc_${id}`).value;
+  await api(`/timeline/${id}`, { method: 'PATCH', body: { ora, titolo, descrizione } });
+  toast('Evento salvato');
+}
+
+async function moveTimeline(id, dir) {
+  const idx = timelineData.findIndex(t => t.id === id);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= timelineData.length) return;
+  await api(`/timeline/${timelineData[idx].id}`, { method: 'PATCH', body: { sort_order: timelineData[newIdx].sort_order } });
+  await api(`/timeline/${timelineData[newIdx].id}`, { method: 'PATCH', body: { sort_order: timelineData[idx].sort_order } });
+  timelineData = await api('/timeline');
+  renderTimeline();
+}
+
+async function deleteTimeline(id) {
+  if (!confirm('Eliminare questo evento?')) return;
+  await api(`/timeline/${id}`, { method: 'DELETE' });
+  timelineData = await api('/timeline');
+  renderTimeline();
+  toast('Evento eliminato');
+}
+
+async function addTimeline() {
+  const ora = document.getElementById('newTlOra').value.trim();
+  const titolo = document.getElementById('newTlTitolo').value.trim();
+  const descrizione = document.getElementById('newTlDesc').value.trim();
+  if (!ora || !titolo) return;
+  await api('/timeline', { method: 'POST', body: { ora, titolo, descrizione } });
+  document.getElementById('newTlOra').value = '';
+  document.getElementById('newTlTitolo').value = '';
+  document.getElementById('newTlDesc').value = '';
+  timelineData = await api('/timeline');
+  renderTimeline();
+  toast('Evento aggiunto');
+}
+
+// ═══════════════════════════════
+// TAB 5 — LOCATION
+// ═══════════════════════════════
+
+function renderLocations() {
+  const container = document.getElementById('locationItems');
+  container.innerHTML = locationsData.map(l => `
+    <div class="item-row loc-row">
+      <div class="form-group"><label>Icona</label><input value="${esc(l.icona || '')}" id="loc_ico_${l.id}" style="text-align:center;font-size:1.2rem;"></div>
+      <div class="form-group"><label>Titolo</label><input value="${esc(l.titolo)}" id="loc_tit_${l.id}"></div>
+      <div class="form-group"><label>Nome luogo</label><input value="${esc(l.nome_luogo)}" id="loc_nome_${l.id}"></div>
+      <div class="form-group"><label>Indirizzo</label><input value="${esc(l.indirizzo || '')}" id="loc_addr_${l.id}"></div>
+      <div class="form-group"><label>URL Maps</label><input value="${esc(l.maps_url || '')}" id="loc_maps_${l.id}"></div>
+      <div class="item-actions" style="align-self:end;">
+        <button class="btn btn-sm" onclick="saveLocation(${l.id})">Salva</button>
+        <button class="btn btn-sm" onclick="moveLocation(${l.id}, -1)">↑</button>
+        <button class="btn btn-sm" onclick="moveLocation(${l.id}, 1)">↓</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteLocation(${l.id})">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function saveLocation(id) {
+  const titolo = document.getElementById(`loc_tit_${id}`).value;
+  const nome_luogo = document.getElementById(`loc_nome_${id}`).value;
+  const indirizzo = document.getElementById(`loc_addr_${id}`).value;
+  const maps_url = document.getElementById(`loc_maps_${id}`).value;
+  const icona = document.getElementById(`loc_ico_${id}`).value;
+  await api(`/locations/${id}`, { method: 'PATCH', body: { titolo, nome_luogo, indirizzo, maps_url, icona } });
+  toast('Location salvata');
+}
+
+async function moveLocation(id, dir) {
+  const idx = locationsData.findIndex(l => l.id === id);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= locationsData.length) return;
+  await api(`/locations/${locationsData[idx].id}`, { method: 'PATCH', body: { sort_order: locationsData[newIdx].sort_order } });
+  await api(`/locations/${locationsData[newIdx].id}`, { method: 'PATCH', body: { sort_order: locationsData[idx].sort_order } });
+  locationsData = await api('/locations');
+  renderLocations();
+}
+
+async function deleteLocation(id) {
+  if (!confirm('Eliminare questa location?')) return;
+  await api(`/locations/${id}`, { method: 'DELETE' });
+  locationsData = await api('/locations');
+  renderLocations();
+  toast('Location eliminata');
+}
+
+async function addLocation() {
+  const titolo = document.getElementById('newLocTitolo').value.trim();
+  const nome_luogo = document.getElementById('newLocNome').value.trim();
+  const indirizzo = document.getElementById('newLocIndirizzo').value.trim();
+  const maps_url = document.getElementById('newLocMaps').value.trim();
+  const icona = document.getElementById('newLocIcona').value.trim();
+  if (!titolo || !nome_luogo) return;
+  await api('/locations', { method: 'POST', body: { titolo, nome_luogo, indirizzo, maps_url, icona } });
+  document.getElementById('newLocTitolo').value = '';
+  document.getElementById('newLocNome').value = '';
+  document.getElementById('newLocIndirizzo').value = '';
+  document.getElementById('newLocMaps').value = '';
+  document.getElementById('newLocIcona').value = '📍';
+  locationsData = await api('/locations');
+  renderLocations();
+  toast('Location aggiunta');
+}
+
+// ═══════════════════════════════
+// TAB 6 — IMPOSTAZIONI
+// ═══════════════════════════════
+
+async function changePassword() {
+  const old = document.getElementById('oldPass').value;
+  const n1 = document.getElementById('newPass1').value;
+  const n2 = document.getElementById('newPass2').value;
+  if (n1 !== n2) return toast('Le password non coincidono');
+  if (!n1) return toast('Inserisci una nuova password');
+  try {
+    await api('/admin/password', { method: 'POST', body: { oldPassword: old, newPassword: n1 } });
+    document.getElementById('oldPass').value = '';
+    document.getElementById('newPass1').value = '';
+    document.getElementById('newPass2').value = '';
+    toast('Password cambiata');
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+// ── Init ──
+checkAuth();
+</script>
+</body>
+</html>

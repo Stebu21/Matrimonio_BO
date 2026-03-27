@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matrimonio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #fdf6ee;
+  --cream: #f2e8d9;
+  --charcoal: #2a2420;
+  --rust: #b5451b;
+  --rust-light: #d4724a;
+  --amber: #c98a2e;
+  --amber-light: #e8c06a;
+  --forest: #2d4a3e;
+  --forest-mid: #4a7c68;
+  --navy: #1e2d4a;
+  --text-dark: #2a2420;
+  --text-mid: #6b5f57;
+  --text-light: rgba(253,246,238,0.75);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 300;
+  color: var(--text-dark);
+  background: var(--bg);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-style: italic; }
+
+.section-label {
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.6rem;
+  color: var(--amber);
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  color: var(--text-dark);
+  margin-bottom: 1.5rem;
+}
+
+.section-pad { padding: 5rem 1.5rem; max-width: 900px; margin: 0 auto; text-align: center; }
+
+/* ── Navbar ── */
+.navbar {
+  position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+  background: rgba(42,36,32,0.7);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201,138,46,0.15);
+  transition: background 0.3s;
+}
+.navbar-inner {
+  max-width: 1100px; margin: 0 auto; padding: 0.8rem 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  color: var(--amber-light); font-size: 1.2rem; text-decoration: none;
+}
+.nav-links { display: flex; gap: 1.5rem; align-items: center; list-style: none; }
+.nav-links a {
+  color: var(--text-light); text-decoration: none; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.15em; font-weight: 300;
+  transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--amber-light); }
+.nav-admin {
+  border: 1px solid var(--amber); color: var(--amber) !important;
+  padding: 0.3rem 0.8rem; border-radius: 2px;
+}
+.nav-admin:hover { background: var(--amber); color: var(--charcoal) !important; }
+
+.nav-hamburger {
+  display: none; background: none; border: none; cursor: pointer;
+  flex-direction: column; gap: 4px; padding: 4px;
+}
+.nav-hamburger span {
+  display: block; width: 22px; height: 2px; background: var(--amber-light);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+  .nav-hamburger { display: flex; }
+  .nav-links {
+    position: fixed; top: 0; right: -100%; width: 70%; height: 100vh;
+    background: var(--charcoal); flex-direction: column; padding: 4rem 2rem;
+    transition: right 0.3s; gap: 1.5rem;
+  }
+  .nav-links.open { right: 0; }
+  .nav-links a { font-size: 0.9rem; }
+}
+
+/* ── Hero ── */
+.hero {
+  position: relative; height: 100svh; display: flex; align-items: center;
+  justify-content: center; text-align: center; overflow: hidden;
+  background: linear-gradient(135deg, var(--charcoal) 0%, var(--navy) 50%, var(--forest) 100%);
+}
+.hero-bg {
+  position: absolute; inset: 0; background-size: cover; background-position: center;
+  z-index: 0;
+}
+.hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom, rgba(42,36,32,0.2) 0%, rgba(42,36,32,0.6) 60%, rgba(42,36,32,0.9) 100%);
+}
+.hero-content { position: relative; z-index: 2; color: #fff; padding: 0 1.5rem; }
+.hero-pretitle {
+  text-transform: uppercase; letter-spacing: 0.4em; font-size: 0.6rem;
+  color: var(--amber-light); margin-bottom: 1rem; font-weight: 400;
+}
+.hero-names {
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 300;
+  font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.1; margin-bottom: 1.5rem;
+}
+.hero-names .amp { color: var(--amber-light); margin: 0 0.3em; }
+.hero-date {
+  font-size: 0.85rem; letter-spacing: 0.2em; color: var(--text-light);
+  margin-bottom: 0.3rem; font-weight: 200;
+}
+.hero-location {
+  font-size: 0.75rem; letter-spacing: 0.15em; color: var(--amber-light);
+  font-weight: 300;
+}
+
+/* Scroll arrow */
+.scroll-arrow {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  z-index: 2; animation: bounceArrow 2s infinite;
+}
+.scroll-arrow svg { width: 28px; height: 28px; stroke: var(--amber-light); fill: none; stroke-width: 2; }
+
+@keyframes bounceArrow {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+  50% { transform: translateX(-50%) translateY(10px); opacity: 0.5; }
+}
+
+/* ── Falling Leaves ── */
+.leaves-container {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden;
+}
+.leaf {
+  position: absolute; top: -60px; opacity: 0;
+  animation: leafFall linear infinite;
+}
+@keyframes leafFall {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.7; }
+  100% { transform: translateY(110vh) translateX(80px) rotate(360deg); opacity: 0; }
+}
+
+/* ── Countdown ── */
+.countdown-section {
+  background: var(--charcoal); color: #fff; padding: 3.5rem 1.5rem; text-align: center;
+}
+.countdown-boxes {
+  display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;
+  max-width: 600px; margin: 0 auto;
+}
+.cd-box { min-width: 80px; }
+.cd-num {
+  font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 300;
+  color: var(--amber-light); line-height: 1;
+}
+.cd-label {
+  text-transform: uppercase; font-size: 0.55rem; letter-spacing: 0.25em;
+  color: var(--text-light); margin-top: 0.3rem;
+}
+
+/* ── Section separator ── */
+.separator { text-align: center; padding: 1rem 0; opacity: 0.4; }
+.separator svg { width: 180px; max-width: 60%; height: auto; }
+
+/* ── Storia ── */
+.storia-section { background: var(--bg); }
+.storia-text {
+  max-width: 650px; margin: 0 auto; font-size: 0.95rem;
+  color: var(--text-mid); line-height: 1.9;
+}
+
+/* ── Carousel ── */
+.carousel-section { background: var(--cream); padding: 5rem 0; }
+.carousel-section .section-label,
+.carousel-section .section-title { text-align: center; padding: 0 1.5rem; }
+.carousel {
+  position: relative; max-width: 800px; margin: 2rem auto 0; overflow: hidden;
+  border-radius: 4px;
+}
+.carousel-track { display: flex; transition: transform 0.5s ease; }
+.carousel-slide {
+  min-width: 100%; position: relative;
+}
+.carousel-slide img {
+  width: 100%; height: 450px; object-fit: cover; display: block;
+}
+.carousel-slide .caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(42,36,32,0.8));
+  color: #fff; padding: 2rem 1rem 1rem; font-size: 0.85rem; text-align: center;
+}
+.car-prev, .car-next {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(42,36,32,0.5); color: #fff; border: none;
+  width: 40px; height: 40px; font-size: 1.4rem; cursor: pointer;
+  border-radius: 50%; transition: background 0.3s;
+}
+.car-prev { left: 12px; }
+.car-next { right: 12px; }
+.car-prev:hover, .car-next:hover { background: rgba(42,36,32,0.8); }
+.car-dots {
+  text-align: center; padding: 1rem; display: flex; justify-content: center; gap: 8px;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--text-mid);
+  cursor: pointer; transition: background 0.3s;
+}
+.dot.active { background: var(--amber); }
+
+@media (max-width: 600px) {
+  .carousel-slide img { height: 280px; }
+}
+
+/* ── Timeline ── */
+.timeline-section { background: var(--bg); }
+.timeline-list { position: relative; max-width: 700px; margin: 0 auto; padding: 2rem 0; }
+.timeline-line {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+  background: var(--amber); opacity: 0.3; transform: translateX(-50%);
+}
+.tl-item {
+  position: relative; width: 45%; padding: 1.2rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.tl-item:nth-child(odd) { margin-left: 0; text-align: right; }
+.tl-item:nth-child(even) { margin-left: 55%; text-align: left; }
+.tl-dot {
+  position: absolute; top: 1.5rem; width: 12px; height: 12px;
+  background: var(--amber); border-radius: 50%;
+  border: 3px solid var(--bg);
+}
+.tl-item:nth-child(odd) .tl-dot { right: -28px; }
+.tl-item:nth-child(even) .tl-dot { left: -28px; }
+.tl-ora {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.6rem;
+  color: var(--rust); font-style: italic;
+}
+.tl-titolo {
+  font-weight: 400; font-size: 0.95rem; text-transform: uppercase;
+  letter-spacing: 0.1em; margin: 0.2rem 0;
+}
+.tl-desc { font-size: 0.8rem; color: var(--text-mid); }
+
+@media (max-width: 600px) {
+  .timeline-line { left: 16px; }
+  .tl-item { width: calc(100% - 50px); margin-left: 50px !important; text-align: left !important; }
+  .tl-dot { left: -40px !important; right: auto !important; }
+}
+
+/* ── Location ── */
+.location-section { background: var(--cream); }
+.location-cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem; max-width: 700px; margin: 0 auto;
+}
+.loc-card {
+  background: #fff; border: 1px solid rgba(201,169,110,0.3);
+  border-top: 3px solid; border-image: linear-gradient(to right, var(--rust), var(--amber)) 1;
+  padding: 2rem 1.5rem; text-align: center; border-radius: 0 0 4px 4px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.loc-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(42,36,32,0.1); }
+.loc-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+.loc-name {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 1.4rem; margin-bottom: 0.3rem;
+}
+.loc-addr { font-size: 0.8rem; color: var(--text-mid); margin-bottom: 1rem; }
+.loc-link {
+  display: inline-block; border: 1px solid var(--amber); color: var(--amber);
+  padding: 0.4rem 1.2rem; text-decoration: none; font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  transition: background 0.3s, color 0.3s;
+}
+.loc-link:hover { background: var(--amber); color: var(--charcoal); }
+
+/* ── Regalo ── */
+.regalo-section { background: var(--bg); }
+.regalo-box {
+  max-width: 550px; margin: 0 auto; background: var(--cream);
+  border: 1px solid rgba(201,169,110,0.3); padding: 2.5rem 2rem; border-radius: 4px;
+}
+.regalo-row { margin-bottom: 1.2rem; }
+.regalo-label-sm {
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.2em;
+  color: var(--text-mid); margin-bottom: 0.2rem;
+}
+.regalo-value {
+  font-family: 'Josefin Sans', sans-serif; font-size: 0.95rem;
+  word-break: break-all; color: var(--text-dark);
+}
+.btn-copy {
+  margin-top: 0.4rem; background: none; border: 1px solid var(--amber);
+  color: var(--amber); padding: 0.25rem 0.8rem; font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
+  transition: background 0.3s, color 0.3s; font-family: 'Josefin Sans', sans-serif;
+}
+.btn-copy:hover { background: var(--amber); color: var(--charcoal); }
+.regalo-note { font-size: 0.75rem; color: var(--text-mid); margin-top: 1.5rem; }
+
+/* ── RSVP ── */
+.rsvp-section { background: var(--charcoal); color: #fff; }
+.rsvp-section .section-label { color: var(--amber-light); }
+.rsvp-section .section-title { color: #fff; }
+.rsvp-section .section-text { color: var(--text-light); margin-bottom: 2rem; font-size: 0.9rem; }
+.rsvp-form { max-width: 450px; margin: 0 auto; text-align: left; }
+.rsvp-form label {
+  display: block; font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.2em; color: var(--amber-light); margin-bottom: 0.3rem;
+}
+.rsvp-form select, .rsvp-form textarea {
+  width: 100%; padding: 0.7rem; background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(201,138,46,0.3); color: #fff;
+  font-family: 'Josefin Sans', sans-serif; font-size: 0.85rem;
+  border-radius: 2px; margin-bottom: 1rem;
+}
+.rsvp-form select option { background: var(--charcoal); color: #fff; }
+.rsvp-form textarea { height: 100px; resize: vertical; }
+.btn-rsvp {
+  width: 100%; padding: 0.8rem; background: none;
+  border: 1px solid var(--amber); color: var(--amber);
+  font-family: 'Josefin Sans', sans-serif; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+.btn-rsvp:hover { background: var(--amber); color: var(--charcoal); }
+.rsvp-msg {
+  text-align: center; margin-top: 1rem; font-size: 0.85rem;
+  color: var(--amber-light); display: none;
+}
+
+/* ── Footer ── */
+.footer {
+  background: var(--charcoal); border-top: 1px solid rgba(201,138,46,0.15);
+  color: var(--text-light); text-align: center; padding: 3rem 1.5rem;
+}
+.footer-monogram {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 1.8rem; color: var(--amber-light); margin-bottom: 0.5rem;
+}
+.footer-info { font-size: 0.7rem; letter-spacing: 0.15em; color: var(--text-light); }
+.footer-text { font-size: 0.75rem; margin-top: 1rem; color: var(--text-mid); }
+
+/* ── Utility ── */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="#" class="nav-brand" id="navBrand">S & S</a>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#storia">Storia</a></li>
+      <li><a href="#programma">Programma</a></li>
+      <li><a href="#location">Location</a></li>
+      <li><a href="#regalo">Regalo</a></li>
+      <li><a href="#rsvp">RSVP</a></li>
+      <li><a href="/admin.html" class="nav-admin">Area Sposi</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero" id="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-overlay"></div>
+  <div class="leaves-container" id="leavesContainer"></div>
+  <div class="hero-content">
+    <p class="hero-pretitle" id="heroPretitle">Ci sposiamo</p>
+    <h1 class="hero-names"><span id="heroN1">Sofia</span><span class="amp">&</span><span id="heroN2">Stefano</span></h1>
+    <p class="hero-date" id="heroDate">3 · Ottobre · 2026</p>
+    <p class="hero-location" id="heroLocation">Villa Morotti, Daverio (VA)</p>
+  </div>
+  <a href="#countdown" class="scroll-arrow">
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </a>
+</section>
+
+<!-- ── Countdown ── -->
+<section class="countdown-section" id="countdown">
+  <div class="countdown-boxes">
+    <div class="cd-box"><div class="cd-num" id="cdDays">0</div><div class="cd-label">Giorni</div></div>
+    <div class="cd-box"><div class="cd-num" id="cdHours">0</div><div class="cd-label">Ore</div></div>
+    <div class="cd-box"><div class="cd-num" id="cdMins">0</div><div class="cd-label">Minuti</div></div>
+    <div class="cd-box"><div class="cd-num" id="cdSecs">0</div><div class="cd-label">Secondi</div></div>
+  </div>
+</section>
+
+<!-- ── Separator ── -->
+<div class="separator">
+  <svg viewBox="0 0 200 30" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 15 Q50 5 100 15 Q150 25 190 15" stroke="#c98a2e" stroke-width="1" fill="none"/>
+    <ellipse cx="40" cy="10" rx="8" ry="5" fill="#c98a2e" opacity="0.5" transform="rotate(-20 40 10)"/>
+    <ellipse cx="100" cy="15" rx="6" ry="4" fill="#b5451b" opacity="0.4" transform="rotate(10 100 15)"/>
+    <ellipse cx="160" cy="10" rx="7" ry="4.5" fill="#2d4a3e" opacity="0.45" transform="rotate(-15 160 10)"/>
+  </svg>
+</div>
+
+<!-- ── Storia ── -->
+<section class="storia-section" id="storia">
+  <div class="section-pad">
+    <p class="section-label" id="storiaLabel">La nostra storia</p>
+    <h2 class="section-title" id="storiaTitle">Un sì che aspettavamo da sempre</h2>
+    <p class="storia-text" id="storiaText"></p>
+  </div>
+</section>
+
+<!-- ── Carousel ── -->
+<section class="carousel-section hidden" id="carouselSection">
+  <p class="section-label">Le nostre foto</p>
+  <h2 class="section-title">Momenti insieme</h2>
+  <div class="carousel" id="carousel">
+    <div class="carousel-track" id="carouselTrack"></div>
+    <button class="car-prev" id="carPrev">&#8249;</button>
+    <button class="car-next" id="carNext">&#8250;</button>
+    <div class="car-dots" id="carDots"></div>
+  </div>
+</section>
+
+<!-- ── Separator ── -->
+<div class="separator">
+  <svg viewBox="0 0 200 30" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 15 Q50 25 100 15 Q150 5 190 15" stroke="#c98a2e" stroke-width="1" fill="none"/>
+    <ellipse cx="60" cy="20" rx="7" ry="4" fill="#c98a2e" opacity="0.45" transform="rotate(15 60 20)"/>
+    <ellipse cx="140" cy="10" rx="8" ry="5" fill="#1e2d4a" opacity="0.4" transform="rotate(-10 140 10)"/>
+  </svg>
+</div>
+
+<!-- ── Programma ── -->
+<section class="timeline-section" id="programma">
+  <div class="section-pad">
+    <p class="section-label" id="programmaLabel">Il grande giorno</p>
+    <h2 class="section-title" id="programmaTitle">Come si svolgerà la giornata</h2>
+    <div class="timeline-list" id="timelineList">
+      <div class="timeline-line"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Separator ── -->
+<div class="separator">
+  <svg viewBox="0 0 200 30" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 15 Q50 5 100 15 Q150 25 190 15" stroke="#c98a2e" stroke-width="1" fill="none"/>
+    <ellipse cx="80" cy="8" rx="6" ry="4" fill="#b5451b" opacity="0.5" transform="rotate(-25 80 8)"/>
+    <ellipse cx="130" cy="20" rx="7" ry="4.5" fill="#2d4a3e" opacity="0.4" transform="rotate(20 130 20)"/>
+  </svg>
+</div>
+
+<!-- ── Location ── -->
+<section class="location-section" id="location">
+  <div class="section-pad">
+    <p class="section-label" id="locationLabel">Dove siamo</p>
+    <h2 class="section-title" id="locationTitle">La location</h2>
+    <div class="location-cards" id="locationCards"></div>
+  </div>
+</section>
+
+<!-- ── Separator ── -->
+<div class="separator">
+  <svg viewBox="0 0 200 30" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 15 Q50 25 100 15 Q150 5 190 15" stroke="#c98a2e" stroke-width="1" fill="none"/>
+    <ellipse cx="50" cy="20" rx="8" ry="5" fill="#c98a2e" opacity="0.4" transform="rotate(10 50 20)"/>
+    <ellipse cx="150" cy="10" rx="6" ry="4" fill="#1e2d4a" opacity="0.45" transform="rotate(-15 150 10)"/>
+  </svg>
+</div>
+
+<!-- ── Regalo ── -->
+<section class="regalo-section" id="regalo">
+  <div class="section-pad">
+    <p class="section-label" id="regaloLabel">Lista nozze</p>
+    <h2 class="section-title" id="regaloTitle">Un pensiero per noi</h2>
+    <p class="storia-text" id="regaloText" style="margin-bottom:2rem;"></p>
+    <div class="regalo-box">
+      <div class="regalo-row">
+        <div class="regalo-label-sm">Intestatario</div>
+        <div class="regalo-value" id="regaloIntestatario"></div>
+        <button class="btn-copy" onclick="copyText('regaloIntestatario')">Copia</button>
+      </div>
+      <div class="regalo-row">
+        <div class="regalo-label-sm">IBAN</div>
+        <div class="regalo-value" id="regaloIban"></div>
+        <button class="btn-copy" onclick="copyText('regaloIban')">Copia</button>
+      </div>
+      <p class="regalo-note" id="regaloNote"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ── RSVP ── -->
+<section class="rsvp-section" id="rsvp">
+  <div class="section-pad">
+    <p class="section-label" id="rsvpLabel">Conferma la tua presenza</p>
+    <h2 class="section-title" id="rsvpTitle">Ci sei?</h2>
+    <p class="section-text" id="rsvpText"></p>
+    <form class="rsvp-form" id="rsvpForm">
+      <label for="rsvpSelect">Il tuo nome</label>
+      <select id="rsvpSelect" required>
+        <option value="">— Seleziona —</option>
+      </select>
+      <label for="rsvpNote">Note, allergie o intolleranze</label>
+      <textarea id="rsvpNote" placeholder="Scrivi qui..."></textarea>
+      <button type="submit" class="btn-rsvp">Conferma presenza</button>
+    </form>
+    <p class="rsvp-msg" id="rsvpMsg"></p>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+  <div class="footer-monogram" id="footerMonogram">Sofia & Stefano</div>
+  <p class="footer-info" id="footerInfo">3 · Ottobre · 2026 · Villa Morotti, Daverio (VA)</p>
+  <p class="footer-text" id="footerText"></p>
+</footer>
+
+<script>
+// ── State ──
+let S = {};
+let guests = [];
+let photos = [];
+let timeline = [];
+let locations = [];
+
+// ── Leaves SVG ──
+const leafSVGs = [
+  // Maple-like leaf
+  `<svg width="30" height="30" viewBox="0 0 30 30"><path d="M15 2 L12 10 L5 8 L10 15 L3 18 L12 18 L10 28 L15 22 L20 28 L18 18 L27 18 L20 15 L25 8 L18 10 Z" fill="currentColor"/></svg>`,
+  // Oval leaf
+  `<svg width="24" height="32" viewBox="0 0 24 32"><ellipse cx="12" cy="16" rx="10" ry="14" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="30" stroke="rgba(0,0,0,0.15)" stroke-width="1"/></svg>`,
+  // Long leaf
+  `<svg width="16" height="36" viewBox="0 0 16 36"><path d="M8 0 Q16 12 8 36 Q0 12 8 0Z" fill="currentColor"/></svg>`,
+  // Round leaf
+  `<svg width="22" height="26" viewBox="0 0 22 26"><path d="M11 0 Q22 8 18 20 Q14 26 11 26 Q8 26 4 20 Q0 8 11 0Z" fill="currentColor"/></svg>`,
+];
+const leafColors = ['#b5451b', '#c98a2e', '#2d4a3e', '#1e2d4a', '#d4724a', '#e8c06a', '#4a7c68', '#b5451b'];
+
+function createLeaves() {
+  const container = document.getElementById('leavesContainer');
+  for (let i = 0; i < 8; i++) {
+    const div = document.createElement('div');
+    div.className = 'leaf';
+    div.style.left = (Math.random() * 100) + '%';
+    div.style.color = leafColors[i % leafColors.length];
+    div.style.animationDuration = (6 + Math.random() * 8) + 's';
+    div.style.animationDelay = (Math.random() * 10) + 's';
+    div.style.opacity = 0.6 + Math.random() * 0.25;
+    div.style.transform = `scale(${0.6 + Math.random() * 0.6})`;
+    div.innerHTML = leafSVGs[i % leafSVGs.length];
+    container.appendChild(div);
+  }
+}
+
+// ── Countdown ──
+let weddingDate = new Date('2026-10-03T11:30:00');
+function updateCountdown() {
+  const now = new Date();
+  let diff = weddingDate - now;
+  if (diff < 0) diff = 0;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cdDays').textContent = d;
+  document.getElementById('cdHours').textContent = h;
+  document.getElementById('cdMins').textContent = m;
+  document.getElementById('cdSecs').textContent = s;
+}
+
+// ── Carousel ──
+let carIdx = 0;
+let carInterval;
+function initCarousel(carouselPhotos) {
+  const section = document.getElementById('carouselSection');
+  if (!carouselPhotos.length || S.carousel_visibile === '0') {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+  const track = document.getElementById('carouselTrack');
+  const dots = document.getElementById('carDots');
+  track.innerHTML = '';
+  dots.innerHTML = '';
+  carouselPhotos.forEach((p, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'carousel-slide';
+    slide.innerHTML = `<img src="${p.url}" alt="${p.caption || ''}">` +
+      (p.caption ? `<p class="caption">${p.caption}</p>` : '');
+    track.appendChild(slide);
+    const dot = document.createElement('span');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goToSlide(i);
+    dots.appendChild(dot);
+  });
+  carIdx = 0;
+  updateCarousel();
+  clearInterval(carInterval);
+  carInterval = setInterval(() => { goToSlide((carIdx + 1) % carouselPhotos.length); }, 5000);
+
+  const carousel = document.getElementById('carousel');
+  carousel.addEventListener('mouseenter', () => clearInterval(carInterval));
+  carousel.addEventListener('mouseleave', () => {
+    carInterval = setInterval(() => { goToSlide((carIdx + 1) % carouselPhotos.length); }, 5000);
+  });
+
+  // Touch
+  let touchStartX = 0;
+  carousel.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  carousel.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      goToSlide(diff > 0 ? Math.min(carIdx + 1, carouselPhotos.length - 1) : Math.max(carIdx - 1, 0));
+    }
+  });
+}
+function goToSlide(i) {
+  carIdx = i;
+  updateCarousel();
+}
+function updateCarousel() {
+  document.getElementById('carouselTrack').style.transform = `translateX(-${carIdx * 100}%)`;
+  document.querySelectorAll('.car-dots .dot').forEach((d, i) => d.classList.toggle('active', i === carIdx));
+}
+
+// ── Render functions ──
+function renderTimeline(items) {
+  const list = document.getElementById('timelineList');
+  list.innerHTML = '<div class="timeline-line"></div>';
+  items.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'tl-item';
+    div.innerHTML = `<div class="tl-dot"></div>
+      <div class="tl-ora">${t.ora}</div>
+      <div class="tl-titolo">${t.titolo}</div>
+      <div class="tl-desc">${t.descrizione || ''}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function renderLocations(items) {
+  const container = document.getElementById('locationCards');
+  container.innerHTML = '';
+  items.forEach(loc => {
+    const card = document.createElement('div');
+    card.className = 'loc-card';
+    card.innerHTML = `<div class="loc-icon">${loc.icona || '📍'}</div>
+      <div class="loc-name">${loc.nome_luogo}</div>
+      <div class="loc-addr">${loc.indirizzo || ''}</div>
+      ${loc.maps_url ? `<a href="${loc.maps_url}" target="_blank" rel="noopener" class="loc-link">Apri in Maps</a>` : ''}`;
+    container.appendChild(card);
+  });
+}
+
+function renderGuests(items) {
+  const select = document.getElementById('rsvpSelect');
+  select.innerHTML = '<option value="">— Seleziona —</option>';
+  items.filter(g => !g.confermato).forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g.id;
+    opt.textContent = `${g.nome} ${g.cognome}`;
+    select.appendChild(opt);
+  });
+}
+
+function applySettings() {
+  document.title = `${S.sposi_nome1 || 'Sofia'} & ${S.sposi_nome2 || 'Stefano'} — Matrimonio`;
+  document.getElementById('navBrand').textContent = `${(S.sposi_nome1||'S')[0]} & ${(S.sposi_nome2||'S')[0]}`;
+  document.getElementById('heroPretitle').textContent = S.hero_pretitle || '';
+  document.getElementById('heroN1').textContent = S.sposi_nome1 || '';
+  document.getElementById('heroN2').textContent = S.sposi_nome2 || '';
+  document.getElementById('heroDate').textContent = S.data_display || '';
+  document.getElementById('heroLocation').textContent = S.location_display || '';
+  document.getElementById('storiaLabel').textContent = S.storia_label || '';
+  document.getElementById('storiaTitle').textContent = S.storia_title || '';
+  document.getElementById('storiaText').textContent = S.storia_testo || '';
+  document.getElementById('programmaLabel').textContent = S.programma_label || '';
+  document.getElementById('programmaTitle').textContent = S.programma_title || '';
+  document.getElementById('locationLabel').textContent = S.location_label || '';
+  document.getElementById('locationTitle').textContent = S.location_title || '';
+  document.getElementById('regaloLabel').textContent = S.regalo_label || '';
+  document.getElementById('regaloTitle').textContent = S.regalo_title || '';
+  document.getElementById('regaloText').textContent = S.regalo_testo || '';
+  document.getElementById('regaloIntestatario').textContent = S.regalo_intestatario || '';
+  document.getElementById('regaloIban').textContent = S.regalo_iban || '';
+  document.getElementById('regaloNote').textContent = S.regalo_note || '';
+  document.getElementById('rsvpLabel').textContent = S.rsvp_label || '';
+  document.getElementById('rsvpTitle').textContent = S.rsvp_title || '';
+  document.getElementById('rsvpText').textContent = S.rsvp_testo || '';
+  document.getElementById('footerMonogram').textContent = `${S.sposi_nome1 || 'Sofia'} & ${S.sposi_nome2 || 'Stefano'}`;
+  document.getElementById('footerInfo').textContent = `${S.data_display || ''} · ${S.location_display || ''}`;
+  document.getElementById('footerText').textContent = S.footer_testo || '';
+
+  if (S.data_matrimonio) weddingDate = new Date(S.data_matrimonio);
+}
+
+// ── Copy ──
+function copyText(id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(id).nextElementSibling;
+    if (btn) { btn.textContent = 'Copiato!'; setTimeout(() => btn.textContent = 'Copia', 2000); }
+  });
+}
+
+// ── RSVP submit ──
+document.getElementById('rsvpForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('rsvpSelect').value;
+  const note = document.getElementById('rsvpNote').value;
+  if (!id) return;
+  try {
+    await fetch(`/api/guests/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confermato: 1, note })
+    });
+    const msg = document.getElementById('rsvpMsg');
+    msg.textContent = 'Grazie! La tua presenza è stata confermata ❤';
+    msg.style.display = 'block';
+    document.getElementById('rsvpForm').style.display = 'none';
+  } catch (err) {
+    alert('Errore nella conferma. Riprova.');
+  }
+});
+
+// ── Navbar hamburger ──
+document.getElementById('navHamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+// ── Init ──
+async function init() {
+  try {
+    const [settingsRes, guestsRes, photosRes, timelineRes, locationsRes] = await Promise.all([
+      fetch('/api/settings').then(r => r.json()),
+      fetch('/api/guests').then(r => r.json()),
+      fetch('/api/photos').then(r => r.json()),
+      fetch('/api/timeline').then(r => r.json()),
+      fetch('/api/locations').then(r => r.json()),
+    ]);
+
+    S = settingsRes;
+    guests = guestsRes;
+    photos = photosRes;
+    timeline = timelineRes;
+    locations = locationsRes;
+
+    applySettings();
+    renderTimeline(timeline);
+    renderLocations(locations);
+    renderGuests(guests);
+
+    // Hero background
+    const heroPhoto = photos.find(p => p.is_hero);
+    if (heroPhoto) {
+      document.getElementById('heroBg').style.backgroundImage = `url(${heroPhoto.url})`;
+    }
+
+    // Carousel
+    const carouselPhotos = photos.filter(p => !p.is_hero);
+    initCarousel(carouselPhotos);
+
+    createLeaves();
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // Carousel nav buttons
+    const cphotos = photos.filter(p => !p.is_hero);
+    document.getElementById('carPrev').onclick = () => { if (carIdx > 0) goToSlide(carIdx - 1); };
+    document.getElementById('carNext').onclick = () => { if (carIdx < cphotos.length - 1) goToSlide(carIdx + 1); };
+
+  } catch (err) {
+    console.error('Errore nel caricamento:', err);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
