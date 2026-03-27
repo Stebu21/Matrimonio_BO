@@ -1,0 +1,84 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# ── API Redirects ──
+# Le rotte piu' specifiche devono stare prima di quelle generiche.
+
+[[redirects]]
+  from = "/api/admin/login"
+  to = "/.netlify/functions/admin-login"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/logout"
+  to = "/.netlify/functions/admin-logout"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/me"
+  to = "/.netlify/functions/admin-me"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/settings"
+  to = "/.netlify/functions/admin-settings"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/password"
+  to = "/.netlify/functions/admin-password"
+  status = 200
+
+[[redirects]]
+  from = "/api/guests/import-matrimoniocom"
+  to = "/.netlify/functions/guests-import"
+  status = 200
+
+[[redirects]]
+  from = "/api/guests/*"
+  to = "/.netlify/functions/guests"
+  status = 200
+
+[[redirects]]
+  from = "/api/guests"
+  to = "/.netlify/functions/guests"
+  status = 200
+
+[[redirects]]
+  from = "/api/photos/*"
+  to = "/.netlify/functions/photos"
+  status = 200
+
+[[redirects]]
+  from = "/api/photos"
+  to = "/.netlify/functions/photos"
+  status = 200
+
+[[redirects]]
+  from = "/api/timeline/*"
+  to = "/.netlify/functions/timeline"
+  status = 200
+
+[[redirects]]
+  from = "/api/timeline"
+  to = "/.netlify/functions/timeline"
+  status = 200
+
+[[redirects]]
+  from = "/api/locations/*"
+  to = "/.netlify/functions/locations"
+  status = 200
+
+[[redirects]]
+  from = "/api/locations"
+  to = "/.netlify/functions/locations"
+  status = 200
+
+[[redirects]]
+  from = "/api/settings"
+  to = "/.netlify/functions/settings"
+  status = 200

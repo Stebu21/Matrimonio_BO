@@ -1,14 +1,14 @@
 # Matrimonio Sofia & Stefano
 
 Sito web per matrimoni completamente configurabile dal pannello admin.
-Deployabile su **Railway** con un solo click.
+Deployabile su **Netlify** + **Supabase**.
 
 ## Stack
 
-- **Node.js 20+** con Express.js
-- **SQLite** via better-sqlite3 (zero config, zero servizi esterni)
-- **HTML/CSS/Vanilla JS** (nessun framework, nessun build step)
-- **Multer** per upload foto
+- **Netlify** — hosting statico + serverless functions
+- **Supabase** — database PostgreSQL + storage foto
+- **HTML/CSS/Vanilla JS** — nessun framework, nessun build step
+- **JWT** — autenticazione admin stateless via cookie
 
 ---
 
@@ -27,37 +27,46 @@ cd matrimonio-web
 npm install
 ```
 
-### 3. Configura le variabili d'ambiente
+Serve anche la Netlify CLI:
 
-Copia il file di esempio e modificalo se vuoi:
+```bash
+npm install -g netlify-cli
+```
+
+### 3. Configura Supabase
+
+1. Crea un progetto su [supabase.com](https://supabase.com)
+2. Vai su **SQL Editor** e incolla il contenuto di `supabase/schema.sql` — crea tabelle, RLS, storage bucket e dati di default
+3. Vai su **Storage** e verifica che il bucket `photos` esista ed sia pubblico
+
+### 4. Configura le variabili d'ambiente
 
 ```bash
 cp .env.example .env
 ```
 
-Il file `.env` contiene:
+Compila il file `.env`:
 
-| Variabile        | Default                              | Descrizione                        |
-|------------------|--------------------------------------|------------------------------------|
-| `PORT`           | `3000`                               | Porta del server                   |
-| `SESSION_SECRET` | `cambia-questa-stringa-con-...`      | Stringa segreta per le sessioni    |
-| `ADMIN_USER`     | `sposi`                              | Username per il pannello admin     |
-| `ADMIN_PASS`     | `sofia2026`                          | Password per il pannello admin     |
+| Variabile                  | Descrizione                                  |
+|----------------------------|----------------------------------------------|
+| `SUPABASE_URL`             | URL del progetto Supabase                    |
+| `SUPABASE_SERVICE_ROLE_KEY`| Service role key (da Settings > API)         |
+| `ADMIN_USER`               | Username admin (default: `sposi`)            |
+| `ADMIN_PASS`               | Password admin (default: `sofia2026`)        |
+| `SESSION_SECRET`           | Stringa segreta per firmare i JWT            |
 
-### 4. Avvia il server
+### 5. Avvia il server
 
 ```bash
-# Produzione
-npm start
-
-# Sviluppo (auto-reload)
 npm run dev
 ```
 
-### 5. Apri nel browser
+Questo avvia `netlify dev`, che serve i file statici e le functions localmente.
 
-- **Sito pubblico:** http://localhost:3000
-- **Pannello admin:** http://localhost:3000/admin.html
+### 6. Apri nel browser
+
+- **Sito pubblico:** http://localhost:8888
+- **Pannello admin:** http://localhost:8888/admin.html
 
 ### Credenziali admin di default
 
@@ -70,24 +79,25 @@ La password puo' essere cambiata dal pannello admin (tab Impostazioni).
 
 ---
 
-## Deploy su Railway
+## Deploy su Netlify
 
-### 1. Crea un account su [railway.app](https://railway.app)
+### 1. Crea un account su [netlify.com](https://www.netlify.com)
 
 ### 2. Collega il repository
 
-- Vai su **New Project** > **Deploy from GitHub repo**
-- Seleziona il repository del matrimonio
-- Railway rileva automaticamente `package.json` e usa `npm start`
+- **New site** > **Import an existing project** > seleziona il repo GitHub
+- Netlify rileva automaticamente `netlify.toml`
 
 ### 3. Configura le variabili d'ambiente
 
-Vai in **Variables** e aggiungi:
+Vai in **Site settings > Environment variables** e aggiungi:
 
 ```
-SESSION_SECRET = <stringa-casuale-lunga>
-ADMIN_USER     = sposi
-ADMIN_PASS     = <la-tua-password>
+SUPABASE_URL             = https://xxxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY = eyJhbG...
+ADMIN_USER               = sposi
+ADMIN_PASS               = <la-tua-password>
+SESSION_SECRET           = <stringa-casuale-lunga>
 ```
 
 Per generare un secret sicuro:
@@ -96,21 +106,9 @@ Per generare un secret sicuro:
 openssl rand -hex 32
 ```
 
-### 4. Aggiungi i volumi per persistenza
+### 4. Deploy
 
-Vai in **Settings > Volumes** e crea due volumi:
-
-| Volume  | Mount Path           | Scopo                              |
-|---------|----------------------|------------------------------------|
-| uploads | `/app/public/uploads`| Foto caricate sopravvivono ai deploy |
-| db      | `/app/db`            | Database SQLite persiste tra i deploy |
-
-> Senza i volumi, le foto e il database vengono persi ad ogni redeploy.
-
-### 5. Deploy
-
-Railway fa il deploy automaticamente ad ogni `git push` sul branch principale.
-Il primo avvio crea il database e inserisce tutti i dati di default.
+Netlify fa il deploy automaticamente ad ogni `git push` sul branch principale.
 
 ---
 
@@ -118,21 +116,30 @@ Il primo avvio crea il database e inserisce tutti i dati di default.
 
 ```
 /
-├── server.js                  <- entry point Express
+├── netlify.toml                      <- config Netlify (build + redirects API)
 ├── package.json
-├── railway.toml               <- config Railway
-├── .env                       <- variabili d'ambiente (non committare in produzione)
-├── .env.example               <- template variabili d'ambiente
-├── db/
-│   └── database.js            <- init SQLite + query
-├── routes/
-│   └── api.js                 <- API REST + rotte admin
-├── middleware/
-│   └── auth.js                <- autenticazione admin (session cookie)
+├── .env.example                      <- template variabili d'ambiente
+├── supabase/
+│   └── schema.sql                    <- schema PostgreSQL + seed dati
+├── netlify/
+│   └── functions/
+│       ├── _shared/
+│       │   ├── supabase.js           <- client Supabase (service role)
+│       │   └── auth.js               <- JWT auth helper
+│       ├── settings.js               <- GET impostazioni
+│       ├── guests.js                 <- CRUD invitati + RSVP
+│       ├── guests-import.js          <- import da matrimonio.com
+│       ├── photos.js                 <- CRUD foto (Supabase Storage)
+│       ├── timeline.js               <- CRUD programma
+│       ├── locations.js              <- CRUD location
+│       ├── admin-login.js            <- login admin
+│       ├── admin-logout.js           <- logout admin
+│       ├── admin-me.js               <- check sessione
+│       ├── admin-settings.js         <- salva impostazioni
+│       └── admin-password.js         <- cambio password
 └── public/
-    ├── index.html             <- sito frontend (single page)
-    ├── admin.html             <- pannello admin
-    └── uploads/               <- foto caricate
+    ├── index.html                    <- sito frontend (single page)
+    └── admin.html                    <- pannello admin
 ```
 
 ---
@@ -166,36 +173,25 @@ La prima riga (intestazione) viene ignorata.
 
 ## API
 
-Tutte le API sono sotto `/api/`. Le GET sono pubbliche, le POST/PATCH/DELETE richiedono sessione admin.
+Tutte le API sono sotto `/api/`. Le GET sono pubbliche, le POST/PATCH/DELETE richiedono autenticazione admin (JWT cookie).
 
-| Metodo   | Endpoint              | Descrizione                    |
-|----------|-----------------------|--------------------------------|
-| `GET`    | `/api/settings`       | Tutti i settings               |
-| `GET`    | `/api/guests`         | Lista invitati                 |
-| `PATCH`  | `/api/guests/:id`     | Conferma RSVP (pubblico)       |
-| `GET`    | `/api/photos`         | Lista foto                     |
-| `GET`    | `/api/timeline`       | Programma della giornata       |
-| `GET`    | `/api/locations`      | Location                       |
-| `POST`   | `/api/admin/login`    | Login admin                    |
-| `POST`   | `/api/admin/settings` | Salva impostazioni (protetto)  |
-
----
-
-## Primo avvio
-
-Al primo avvio il sistema automaticamente:
-
-1. Crea il database SQLite con tutte le tabelle
-2. Inserisce i dati di default (testi, timeline, location)
-3. Crea la cartella uploads
-
-Non serve nessuna configurazione manuale: il sito funziona subito.
+| Metodo   | Endpoint                          | Descrizione                    |
+|----------|-----------------------------------|--------------------------------|
+| `GET`    | `/api/settings`                   | Tutti i settings               |
+| `GET`    | `/api/guests`                     | Lista invitati                 |
+| `PATCH`  | `/api/guests/:id`                 | Conferma RSVP (pubblico)       |
+| `GET`    | `/api/photos`                     | Lista foto                     |
+| `GET`    | `/api/timeline`                   | Programma della giornata       |
+| `GET`    | `/api/locations`                  | Location                       |
+| `POST`   | `/api/admin/login`                | Login admin                    |
+| `POST`   | `/api/admin/settings`             | Salva impostazioni (protetto)  |
+| `POST`   | `/api/guests/import-matrimoniocom`| Import da matrimonio.com       |
 
 ---
 
 ## Note
 
-- Le foto vengono salvate in `public/uploads/` e servite come file statici
-- Il database e' in `db/matrimonio.db`
+- Le foto sono salvate su **Supabase Storage** (bucket `photos`, pubblico)
 - La password admin puo' essere cambiata dal pannello: viene salvata nel database e ha priorita' sulle variabili d'ambiente
 - Il sito e' responsive e ottimizzato per mobile
+- Non serve nessun volume o persistenza esterna: Supabase gestisce tutto

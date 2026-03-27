@@ -4,42 +4,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Wedding website for Sofia & Stefano (October 3, 2026). Full-stack Node.js app with admin panel, deployed on Railway. All text is in Italian.
+Wedding website for Sofia & Stefano (October 3, 2026). Netlify (static + serverless functions) + Supabase (PostgreSQL + Storage). All text is in Italian.
 
 ## Commands
 
 ```bash
 npm install          # Install dependencies
-npm run dev          # Dev server with auto-reload (node --watch)
-npm start            # Production start
+npm run dev          # Local dev via netlify dev (http://localhost:8888)
 ```
 
-No build step, no test framework, no linter configured.
+No build step, no test framework, no linter configured. Requires `netlify-cli` installed globally.
 
 ## Architecture
 
-Single Express server (`server.js`) with SQLite (better-sqlite3) and vanilla HTML/CSS/JS frontend.
+Static HTML frontend served by Netlify, with serverless functions as API backend and Supabase for data + file storage.
 
-- **server.js** - Entry point. Sets up Express middleware (sessions, static files) and mounts `/api` routes. Calls `db.init()` on startup.
-- **db/database.js** - Database layer. Creates tables and seeds default data on first run. Exports query helper functions (no ORM). DB file lives at `db/matrimonio.db`.
-- **routes/api.js** - All API endpoints under `/api/`. Public GET routes + public RSVP PATCH. Admin routes protected by `auth` middleware.
-- **middleware/auth.js** - Session-based auth check (`req.session.isAdmin`).
 - **public/index.html** - Public-facing wedding site (single page, vanilla JS).
 - **public/admin.html** - Admin panel (6 tabs: guests, texts, photos, timeline, locations, settings).
-- **public/uploads/** - Photo uploads served as static files.
+- **netlify/functions/** - Serverless API functions, one per resource/action.
+- **netlify/functions/_shared/supabase.js** - Supabase client (service role key, bypasses RLS).
+- **netlify/functions/_shared/auth.js** - JWT-based auth: sign/verify tokens, cookie helpers.
+- **netlify.toml** - Build config + redirect rules mapping `/api/*` to functions.
+- **supabase/schema.sql** - PostgreSQL schema, RLS policies, storage bucket, and seed data.
 
 ## Key Patterns
 
-- **Auth**: Admin login checks against env vars (`ADMIN_USER`/`ADMIN_PASS`), but a DB-stored `admin_pass_override` setting takes priority over env for password.
-- **DB seeding**: Tables and default data are only inserted when tables are empty (idempotent `init()`).
-- **File uploads**: Multer handles photo uploads (max 10MB, jpeg/png/webp/gif only) to `public/uploads/`.
-- **Guest import**: Supports TSV format from matrimonio.com via `/api/guests/import-matrimoniocom`.
+- **Auth**: Admin login checks against env vars (`ADMIN_USER`/`ADMIN_PASS`), but a DB-stored `admin_pass_override` setting takes priority. JWT token stored in httpOnly cookie (24h expiry), verified in each protected function via `verifyToken(event)`.
+- **API routing**: `netlify.toml` redirects map `/api/*` paths to `/.netlify/functions/*`. Functions parse `event.path` to extract resource IDs (e.g. `/api/guests/123`).
+- **Photo storage**: Photos uploaded via multipart form data, parsed with `parse-multipart-data`, stored in Supabase Storage bucket `photos`. Public URLs returned via `supabase.storage.from('photos').getPublicUrl()`.
+- **DB access**: All functions use the Supabase service role key (bypasses RLS). Schema uses standard PostgreSQL with `SERIAL` primary keys.
 - **All DB columns use Italian names** (nome, cognome, confermato, etc.).
 
 ## Environment Variables
 
-`PORT`, `SESSION_SECRET`, `ADMIN_USER`, `ADMIN_PASS` (see `.env.example`).
-
-## Deployment
-
-Railway with nixpacks builder. Healthcheck at `/api/settings`. Volumes needed for `public/uploads/` and `db/` to persist across deploys.
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USER`, `ADMIN_PASS`, `SESSION_SECRET` (see `.env.example`).
