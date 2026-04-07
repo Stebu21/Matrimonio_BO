@@ -635,9 +635,13 @@ function populateSettingsForm() {
       const value = settings[k] || '';
       // Se è un editor Quill, imposta il contenuto HTML usando dangerouslyPasteHTML
       if (quillEditors[k]) {
+        console.log('Loading Quill editor', k, 'with value:', value ? value.substring(0, 50) + '...' : '(empty)');
         quillEditors[k].setContents([]); // Pulisci prima
-        quillEditors[k].dangerouslyPasteHTML(value);
+        if (value) {
+          quillEditors[k].dangerouslyPasteHTML(value);
+        }
       } else {
+        console.log('Not a Quill editor:', k, '- setting as input value');
         el.value = value;
       }
     }
@@ -665,10 +669,16 @@ async function saveAllSettings() {
 const quillEditors = {};
 
 function initQuill() {
-  ['s_storia_testo', 's_regalo_testo', 's_rsvp_testo'].forEach(id => {
-    const toolbarContainer = document.querySelector('#' + id).parentElement.querySelector('.ql-toolbar');
+  ['storia_testo', 'regalo_testo', 'rsvp_testo'].forEach(key => {
+    const id = 's_' + key;
+    const el = document.getElementById(id);
+    console.log('initQuill looking for #' + id, '- found:', el ? 'YES' : 'NO');
+    if (!el) {
+      console.warn('Element not found for Quill:', id);
+      return;
+    }
 
-    quillEditors[id] = new Quill('#' + id, {
+    quillEditors[key] = new Quill('#' + id, {
       theme: 'snow',
       modules: {
         toolbar: [
@@ -682,8 +692,10 @@ function initQuill() {
       placeholder: 'Scrivi il testo qui...'
     });
 
+    console.log('Quill initialized for', key, '(#' + id + ')');
+
     // Aggiungi bottone personalizzato per il line break (a capo)
-    const editor = quillEditors[id];
+    const editor = quillEditors[key];
     const toolbar = editor.getModule('toolbar');
     const breakBtn = document.createElement('button');
     breakBtn.innerHTML = '⏎';
