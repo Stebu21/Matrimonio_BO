@@ -1019,10 +1019,10 @@ DESCRIPTION:${description.replace(/\n/g, '\\n')}
 END:VEVENT
 END:VCALENDAR`;
 
-  // Scarica file .ics
-  const blob = new Blob([ical], { type: 'text/calendar;charset=utf-8' });
+  // Scarica file .ics (mobile-friendly con data: URL)
+  const encodedIcal = encodeURIComponent(ical);
   const link = document.createElement('a');
-  link.setAttribute('href', URL.createObjectURL(blob));
+  link.setAttribute('href', `data:text/calendar;charset=utf-8,${encodedIcal}`);
   link.setAttribute('download', `Matrimonio-Sofia-Stefano.ics`);
   link.style.visibility = 'hidden';
   document.body.appendChild(link);
