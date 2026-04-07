@@ -5,6 +5,9 @@
 [functions]
   node_bundler = "esbuild"
 
+[functions."supabase-keepalive"]
+  schedule = "0 */12 * * *"
+
 # ── API Redirects ──
 # Le rotte piu' specifiche devono stare prima di quelle generiche.
 
