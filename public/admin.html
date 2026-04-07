@@ -638,7 +638,9 @@ function populateSettingsForm() {
         console.log('Loading Quill editor', k, 'with value:', value ? value.substring(0, 50) + '...' : '(empty)');
         quillEditors[k].setContents([]); // Pulisci prima
         if (value) {
-          quillEditors[k].dangerouslyPasteHTML(value);
+          // Converti newline in <br/> per Quill
+          const htmlValue = value.replace(/\n/g, '<br/>');
+          quillEditors[k].dangerouslyPasteHTML(htmlValue);
         }
       } else {
         console.log('Not a Quill editor:', k, '- setting as input value');
