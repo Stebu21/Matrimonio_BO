@@ -136,7 +136,7 @@ td { padding: 0.6rem; border-bottom: 1px solid var(--cream); }
   margin-bottom: 0.8rem; border-radius: 4px;
   display: grid; grid-template-columns: 1fr 1fr 2fr auto; gap: 0.8rem; align-items: end;
 }
-.item-row.loc-row { grid-template-columns: 60px 1fr 1fr 1fr 1fr auto; }
+.item-row.loc-row { grid-template-columns: 60px 1fr 1fr 1fr 1fr 2fr auto; }
 .item-row input, .item-row textarea {
   padding: 0.4rem; font-size: 0.8rem; border: 1px solid var(--cream);
   font-family: 'Josefin Sans', sans-serif; width: 100%;
@@ -371,6 +371,7 @@ td { padding: 0.6rem; border-bottom: 1px solid var(--cream); }
       <div class="form-group"><label>Nome luogo</label><input id="newLocNome"></div>
       <div class="form-group"><label>Indirizzo</label><input id="newLocIndirizzo"></div>
       <div class="form-group"><label>URL Maps</label><input id="newLocMaps"></div>
+      <div class="form-group"><label>Descrizione</label><textarea id="newLocDescrizione"></textarea></div>
       <button class="btn" onclick="addLocation()" style="align-self:end;">Aggiungi</button>
     </div>
   </div>
@@ -875,6 +876,7 @@ function renderLocations() {
       <div class="form-group"><label>Nome luogo</label><input value="${esc(l.nome_luogo)}" id="loc_nome_${l.id}"></div>
       <div class="form-group"><label>Indirizzo</label><input value="${esc(l.indirizzo || '')}" id="loc_addr_${l.id}"></div>
       <div class="form-group"><label>URL Maps</label><input value="${esc(l.maps_url || '')}" id="loc_maps_${l.id}"></div>
+      <div class="form-group"><label>Descrizione</label><textarea id="loc_desc_${l.id}">${esc(l.descrizione || '')}</textarea></div>
       <div class="item-actions" style="align-self:end;">
         <button class="btn btn-sm" onclick="saveLocation(${l.id})">Salva</button>
         <button class="btn btn-sm" onclick="moveLocation(${l.id}, -1)">↑</button>
@@ -891,7 +893,8 @@ async function saveLocation(id) {
   const indirizzo = document.getElementById(`loc_addr_${id}`).value;
   const maps_url = document.getElementById(`loc_maps_${id}`).value;
   const icona = document.getElementById(`loc_ico_${id}`).value;
-  await api(`/locations/${id}`, { method: 'PATCH', body: { titolo, nome_luogo, indirizzo, maps_url, icona } });
+  const descrizione = document.getElementById(`loc_desc_${id}`).value;
+  await api(`/locations/${id}`, { method: 'PATCH', body: { titolo, nome_luogo, indirizzo, maps_url, icona, descrizione } });
   toast('Location salvata');
 }
 
@@ -919,13 +922,15 @@ async function addLocation() {
   const indirizzo = document.getElementById('newLocIndirizzo').value.trim();
   const maps_url = document.getElementById('newLocMaps').value.trim();
   const icona = document.getElementById('newLocIcona').value.trim();
+  const descrizione = document.getElementById('newLocDescrizione').value.trim();
   if (!titolo || !nome_luogo) return;
-  await api('/locations', { method: 'POST', body: { titolo, nome_luogo, indirizzo, maps_url, icona } });
+  await api('/locations', { method: 'POST', body: { titolo, nome_luogo, indirizzo, maps_url, icona, descrizione } });
   document.getElementById('newLocTitolo').value = '';
   document.getElementById('newLocNome').value = '';
   document.getElementById('newLocIndirizzo').value = '';
   document.getElementById('newLocMaps').value = '';
   document.getElementById('newLocIcona').value = '📍';
+  document.getElementById('newLocDescrizione').value = '';
   locationsData = await api('/locations');
   renderLocations();
   toast('Location aggiunta');

@@ -345,11 +345,12 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 
 .wt-event__time {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 12px;
+  font-size: 25px;
   letter-spacing: 3px;
   color: var(--amber);
   text-transform: uppercase;
   margin-bottom: 4px;
+  font-weight: bold;
 }
 
 .wt-event__title {
@@ -394,8 +395,8 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 /* ── Location ── */
 .location-section { background: var(--cream); }
 .location-cards {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem; max-width: 700px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem; max-width: 1200px; margin: 0 auto;
 }
 .loc-card {
   background: #fff; border: 1px solid rgba(201,169,110,0.3);
@@ -410,6 +411,7 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
   font-size: 1.4rem; margin-bottom: 0.3rem;
 }
 .loc-addr { font-size: 0.8rem; color: var(--text-mid); margin-bottom: 1rem; }
+.loc-desc { font-size: 0.9rem; color: var(--text); margin-bottom: 1rem; line-height: 1.4; }
 .loc-link {
   display: inline-block; border: 1px solid var(--amber); color: var(--amber);
   padding: 0.4rem 1.2rem; text-decoration: none; font-size: 0.7rem;
@@ -494,7 +496,7 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 <!-- ── Navbar ── -->
 <nav class="navbar">
   <div class="navbar-inner">
-    <a href="#" class="nav-brand" id="navBrand">S & S</a>
+    <a href="#" class="nav-brand" id="navBrand">Sofia & Stefano</a>
     <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -798,6 +800,7 @@ function renderLocations(items) {
     card.innerHTML = `<div class="loc-icon">${loc.icona || '📍'}</div>
       <div class="loc-name">${loc.nome_luogo}</div>
       <div class="loc-addr">${loc.indirizzo || ''}</div>
+      ${loc.descrizione ? `<div class="loc-desc">${loc.descrizione}</div>` : ''}
       ${loc.maps_url ? `<a href="${loc.maps_url}" target="_blank" rel="noopener" class="loc-link">Apri in Maps</a>` : ''}`;
     container.appendChild(card);
   });
@@ -816,7 +819,7 @@ function renderGuests(items) {
 
 function applySettings() {
   document.title = `${S.sposi_nome1 || 'Sofia'} & ${S.sposi_nome2 || 'Stefano'} — Matrimonio`;
-  document.getElementById('navBrand').textContent = `${(S.sposi_nome1||'S')[0]} & ${(S.sposi_nome2||'S')[0]}`;
+  document.getElementById('navBrand').textContent = `${(S.sposi_nome1||'Sofia')[0]} & ${(S.sposi_nome2||'Stefano')[0]}`;
   document.getElementById('heroPretitle').textContent = S.hero_pretitle || '';
   document.getElementById('heroN1').textContent = S.sposi_nome1 || '';
   document.getElementById('heroN2').textContent = S.sposi_nome2 || '';

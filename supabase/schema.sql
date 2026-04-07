@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS locations (
   titolo      TEXT NOT NULL,
   nome_luogo  TEXT NOT NULL,
   indirizzo   TEXT DEFAULT '',
+  descrizione TEXT DEFAULT '',
   maps_url    TEXT DEFAULT '',
   icona       TEXT DEFAULT '📍',
   sort_order  INTEGER DEFAULT 0
