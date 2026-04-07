@@ -633,14 +633,15 @@ function populateSettingsForm() {
     const el = document.getElementById('s_' + k);
     if (el) {
       const value = settings[k] || '';
-      // Se è un editor Quill, imposta il contenuto HTML usando dangerouslyPasteHTML
+      // Se è un editor Quill, imposta il contenuto HTML
       if (quillEditors[k]) {
         console.log('Loading Quill editor', k, 'with value:', value ? value.substring(0, 50) + '...' : '(empty)');
-        quillEditors[k].setContents([]); // Pulisci prima
         if (value) {
           // Converti newline in <br/> per Quill
           const htmlValue = value.replace(/\n/g, '<br/>');
-          quillEditors[k].dangerouslyPasteHTML(htmlValue);
+          quillEditors[k].root.innerHTML = htmlValue;
+        } else {
+          quillEditors[k].root.innerHTML = '';
         }
       } else {
         console.log('Not a Quill editor:', k, '- setting as input value');
