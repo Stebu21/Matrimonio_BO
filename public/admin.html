@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Matrimonio</title>
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -176,17 +177,14 @@ td { padding: 0.6rem; border-bottom: 1px solid var(--cream); }
 }
 .toast.show { transform: translateY(0); opacity: 1; }
 
-/* ── TinyMCE styling ── */
-#s_storia_testo, #s_regalo_testo, #s_rsvp_testo {
-  display: none; /* nasconde il textarea, TinyMCE lo rimpiazza */
-}
-.tox { font-family: 'Josefin Sans', sans-serif !important; }
-.tox .tox-tbtn, .tox .tox-tbtn--select { color: var(--text-dark) !important; }
-.tox .tox-toolbar, .tox .tox-toolbar__primary { background: var(--cream) !important; border: 1px solid rgba(201,138,46,0.3) !important; border-bottom: none; }
-.tox .tox-editor-header { border-radius: 4px 4px 0 0; }
-.tox .tox-edit-area { border: 1px solid rgba(201,138,46,0.3) !important; border-top: none; background: #fff !important; }
-.tox .tox-edit-area__iframe { background: #fff !important; }
-.tox-tinymce { border-radius: 4px !important; }
+/* ── Quill styling ── */
+.ql-container { font-family: 'Josefin Sans', sans-serif; font-size: 1rem; border: 1px solid rgba(201,138,46,0.3); border-top: none; border-radius: 0 0 4px 4px; }
+.ql-editor { min-height: 250px; background: #fff; }
+.ql-toolbar { font-family: 'Josefin Sans', sans-serif; background: var(--cream); border: 1px solid rgba(201,138,46,0.3); border-bottom: none; border-radius: 4px 4px 0 0; }
+.ql-snow .ql-toolbar button:hover, .ql-snow .ql-toolbar button:focus, .ql-snow .ql-toolbar button.ql-active, .ql-snow .ql-toolbar.ql-snow button:hover, .ql-snow .ql-toolbar.ql-snow button.ql-active, .ql-snow.ql-toolbar button:hover, .ql-snow.ql-toolbar button.ql-active { color: var(--rust); }
+.ql-snow .ql-stroke { stroke: var(--text-dark); }
+.ql-snow .ql-fill { fill: var(--text-dark); }
+.quill-wrapper { border-radius: 4px; overflow: hidden; }
 
 @media (max-width: 600px) {
   .item-row, .item-row.loc-row { grid-template-columns: 1fr; }
@@ -283,7 +281,7 @@ td { padding: 0.6rem; border-bottom: 1px solid var(--cream); }
         <div class="form-group"><label>Label</label><input id="s_storia_label"></div>
         <div class="form-group"><label>Titolo</label><input id="s_storia_title"></div>
       </div>
-      <div class="form-group"><label>Testo</label><textarea id="s_storia_testo"></textarea></div>
+      <div class="form-group"><label>Testo</label><div class="quill-wrapper"><div id="s_storia_testo"></div></div></div>
     </div>
 
     <div class="settings-group">
@@ -308,7 +306,7 @@ td { padding: 0.6rem; border-bottom: 1px solid var(--cream); }
         <div class="form-group"><label>Label</label><input id="s_regalo_label"></div>
         <div class="form-group"><label>Titolo</label><input id="s_regalo_title"></div>
       </div>
-      <div class="form-group"><label>Testo introduttivo</label><textarea id="s_regalo_testo"></textarea></div>
+      <div class="form-group"><label>Testo introduttivo</label><div class="quill-wrapper"><div id="s_regalo_testo"></div></div></div>
       <div class="form-row">
         <div class="form-group"><label>Intestatario conto</label><input id="s_regalo_intestatario"></div>
         <div class="form-group"><label>IBAN</label><input id="s_regalo_iban"></div>
@@ -322,7 +320,7 @@ td { padding: 0.6rem; border-bottom: 1px solid var(--cream); }
         <div class="form-group"><label>Label</label><input id="s_rsvp_label"></div>
         <div class="form-group"><label>Titolo</label><input id="s_rsvp_title"></div>
       </div>
-      <div class="form-group"><label>Testo introduttivo</label><textarea id="s_rsvp_testo"></textarea></div>
+      <div class="form-group"><label>Testo introduttivo</label><div class="quill-wrapper"><div id="s_rsvp_testo"></div></div></div>
     </div>
 
     <div class="settings-group">
@@ -470,9 +468,9 @@ async function loadAll() {
   renderLocations();
   document.getElementById('carouselToggle').checked = settings.carousel_visibile !== '0';
 
-  // Inizializza TinyMCE per i textarea di testo
-  if (!tinymce.activeEditor) {
-    initTinyMCE();
+  // Inizializza Quill per i textarea di testo
+  if (Object.keys(quillEditors).length === 0) {
+    initQuill();
   }
 }
 
@@ -635,10 +633,11 @@ function populateSettingsForm() {
     const el = document.getElementById('s_' + k);
     if (el) {
       const value = settings[k] || '';
-      el.value = value;
-      // Sincronizza TinyMCE se è inizializzato
-      if (tinymce.get('s_' + k)) {
-        tinymce.get('s_' + k).setContent(value);
+      // Se è un editor Quill, imposta il contenuto HTML
+      if (quillEditors[k]) {
+        quillEditors[k].root.innerHTML = value;
+      } else {
+        el.value = value;
       }
     }
   });
@@ -649,9 +648,9 @@ async function saveAllSettings() {
   settingsKeys.forEach(k => {
     const el = document.getElementById('s_' + k);
     if (el) {
-      // Se TinyMCE è inizializzato, prendi il contenuto da lì, altrimenti da el.value
-      if (tinymce.get('s_' + k)) {
-        obj[k] = tinymce.get('s_' + k).getContent();
+      // Se è un editor Quill, prendi il contenuto HTML, altrimenti da el.value
+      if (quillEditors[k]) {
+        obj[k] = quillEditors[k].root.innerHTML;
       } else {
         obj[k] = el.value;
       }
@@ -662,33 +661,23 @@ async function saveAllSettings() {
   toast('Impostazioni salvate');
 }
 
-function initTinyMCE() {
-  tinymce.init({
-    selector: '#s_storia_testo, #s_regalo_testo, #s_rsvp_testo',
-    license_key: 'gpl',
-    plugins: 'lists link image table code help wordcount',
-    toolbar: 'undo redo | formatselect | bold italic underline strikethrough | bullist numlist | link image table | removeformat help',
-    menubar: false,
-    branding: false,
-    height: 300,
-    content_css: false,
-    body_class: 'tinymce-body',
-    skin: 'oxide-dark',
-    content_style: `
-      body {
-        font-family: 'Josefin Sans', sans-serif;
-        font-weight: 300;
-        color: var(--text-dark);
-        background: var(--bg);
-        line-height: 1.6;
-      }
-      p { margin: 0.5em 0; }
-    `,
-    setup: (editor) => {
-      editor.on('blur', () => {
-        document.getElementById(editor.id).value = editor.getContent();
-      });
-    }
+const quillEditors = {};
+
+function initQuill() {
+  ['s_storia_testo', 's_regalo_testo', 's_rsvp_testo'].forEach(id => {
+    quillEditors[id] = new Quill('#' + id, {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          ['bold', 'italic', 'underline', 'strike'],
+          ['blockquote'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['link'],
+          ['clean']
+        ]
+      },
+      placeholder: 'Scrivi il testo qui...'
+    });
   });
 }
 
