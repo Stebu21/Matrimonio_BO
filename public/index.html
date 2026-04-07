@@ -56,6 +56,9 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 }
 
 .section-pad { padding: 5rem 1.5rem; max-width: 900px; margin: 0 auto; text-align: center; }
+@media (max-width: 600px) {
+  .section-pad { padding: 3rem 1rem; }
+}
 
 /* ── Navbar ── */
 .navbar {
@@ -69,9 +72,19 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
   max-width: 1100px; margin: 0 auto; padding: 0.8rem 1.5rem;
   display: flex; align-items: center; justify-content: space-between;
 }
+@media (max-width: 600px) {
+  .navbar-inner { padding: 0.6rem 1rem; }
+  .nav-brand { font-size: 1rem; }
+}
 .nav-brand {
   font-family: 'Cormorant Garamond', serif; font-style: italic;
   color: var(--amber-light); font-size: 1.2rem; text-decoration: none;
+}
+.nav-brand-full { display: none; }
+.nav-brand-short { display: inline; }
+@media (min-width: 768px) {
+  .nav-brand-full { display: inline; }
+  .nav-brand-short { display: none; }
 }
 .nav-links { display: flex; gap: 1.5rem; align-items: center; list-style: none; }
 .nav-links a {
@@ -398,11 +411,18 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
   display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem; max-width: 1200px; margin: 0 auto;
 }
+@media (max-width: 768px) {
+  .location-cards { grid-template-columns: 1fr; gap: 1rem; }
+  .loc-card { padding: 1.5rem 1.2rem; }
+  .loc-icon { font-size: 1.5rem; }
+  .loc-name { font-size: 1.2rem; }
+}
 .loc-card {
   background: #fff; border: 1px solid rgba(201,169,110,0.3);
   border-top: 3px solid; border-image: linear-gradient(to right, var(--rust), var(--amber)) 1;
   padding: 2rem 1.5rem; text-align: center; border-radius: 0 0 4px 4px;
   transition: transform 0.3s, box-shadow 0.3s;
+  display: flex; flex-direction: column;
 }
 .loc-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(42,36,32,0.1); }
 .loc-icon { font-size: 2rem; margin-bottom: 0.8rem; }
@@ -417,6 +437,7 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
   padding: 0.4rem 1.2rem; text-decoration: none; font-size: 0.7rem;
   text-transform: uppercase; letter-spacing: 0.15em;
   transition: background 0.3s, color 0.3s;
+  margin-top: auto;
 }
 .loc-link:hover { background: var(--amber); color: var(--charcoal); }
 
@@ -482,9 +503,12 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 }
 .footer-monogram {
   font-family: 'Cormorant Garamond', serif; font-style: italic;
-  font-size: 1.8rem; color: var(--amber-light); margin-bottom: 0.5rem;
+  font-size: clamp(1.2rem, 4vw, 1.8rem); color: var(--amber-light); margin-bottom: 0.5rem;
 }
 .footer-info { font-size: 0.7rem; letter-spacing: 0.15em; color: var(--text-light); }
+@media (max-width: 600px) {
+  .footer-info { font-size: 0.65rem; letter-spacing: 0.1em; }
+}
 .footer-text { font-size: 0.75rem; margin-top: 1rem; color: var(--text-mid); }
 
 /* ── Utility ── */
@@ -496,7 +520,10 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 <!-- ── Navbar ── -->
 <nav class="navbar">
   <div class="navbar-inner">
-    <a href="#" class="nav-brand" id="navBrand">Sofia & Stefano</a>
+    <a href="#" class="nav-brand" id="navBrand">
+      <span class="nav-brand-full" id="navBrandFull">Sofia & Stefano</span>
+      <span class="nav-brand-short" id="navBrandShort">S & S</span>
+    </a>
     <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -819,7 +846,10 @@ function renderGuests(items) {
 
 function applySettings() {
   document.title = `${S.sposi_nome1 || 'Sofia'} & ${S.sposi_nome2 || 'Stefano'} — Matrimonio`;
-  document.getElementById('navBrand').textContent = `${(S.sposi_nome1||'Sofia')[0]} & ${(S.sposi_nome2||'Stefano')[0]}`;
+  const full = `${S.sposi_nome1 || 'Sofia'} & ${S.sposi_nome2 || 'Stefano'}`;
+  const short = `${(S.sposi_nome1||'Sofia')[0]} & ${(S.sposi_nome2||'Stefano')[0]}`;
+  document.getElementById('navBrandFull').textContent = full;
+  document.getElementById('navBrandShort').textContent = short;
   document.getElementById('heroPretitle').textContent = S.hero_pretitle || '';
   document.getElementById('heroN1').textContent = S.sposi_nome1 || '';
   document.getElementById('heroN2').textContent = S.sposi_nome2 || '';
