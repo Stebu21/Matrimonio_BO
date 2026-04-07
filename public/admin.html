@@ -457,6 +457,11 @@ document.getElementById('loginPass').addEventListener('keydown', e => { if (e.ke
 
 // ── Load all data ──
 async function loadAll() {
+  // Inizializza Quill PRIMA di caricare i dati
+  if (Object.keys(quillEditors).length === 0) {
+    initQuill();
+  }
+
   [settings, guests, photos, timelineData, locationsData] = await Promise.all([
     api('/settings'), api('/guests'), api('/photos'), api('/timeline'), api('/locations')
   ]);
@@ -467,11 +472,6 @@ async function loadAll() {
   renderTimeline();
   renderLocations();
   document.getElementById('carouselToggle').checked = settings.carousel_visibile !== '0';
-
-  // Inizializza Quill per i textarea di testo
-  if (Object.keys(quillEditors).length === 0) {
-    initQuill();
-  }
 }
 
 // ── Tabs ──
