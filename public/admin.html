@@ -665,6 +665,8 @@ const quillEditors = {};
 
 function initQuill() {
   ['s_storia_testo', 's_regalo_testo', 's_rsvp_testo'].forEach(id => {
+    const toolbarContainer = document.querySelector('#' + id).parentElement.querySelector('.ql-toolbar');
+
     quillEditors[id] = new Quill('#' + id, {
       theme: 'snow',
       modules: {
@@ -678,6 +680,29 @@ function initQuill() {
       },
       placeholder: 'Scrivi il testo qui...'
     });
+
+    // Aggiungi bottone personalizzato per il line break (a capo)
+    const editor = quillEditors[id];
+    const toolbar = editor.getModule('toolbar');
+    const breakBtn = document.createElement('button');
+    breakBtn.innerHTML = '⏎';
+    breakBtn.title = 'A capo (Shift+Enter)';
+    breakBtn.className = 'ql-break';
+    breakBtn.style.cssText = 'width:32px;height:32px;padding:4px;font-size:16px;cursor:pointer;border:none;background:transparent;';
+    breakBtn.onclick = (e) => {
+      e.preventDefault();
+      const range = editor.getSelection();
+      if (range) {
+        editor.insertText(range.index, '\n');
+        editor.setSelection(range.index + 1);
+      }
+    };
+
+    // Inserisci il bottone nel toolbar prima del bottone clean
+    const cleanBtn = editor.getModule('toolbar').container.querySelector('.ql-clean');
+    if (cleanBtn && cleanBtn.parentElement) {
+      cleanBtn.parentElement.insertBefore(breakBtn, cleanBtn);
+    }
   });
 }
 
