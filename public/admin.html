@@ -633,9 +633,10 @@ function populateSettingsForm() {
     const el = document.getElementById('s_' + k);
     if (el) {
       const value = settings[k] || '';
-      // Se è un editor Quill, imposta il contenuto HTML
+      // Se è un editor Quill, imposta il contenuto HTML usando dangerouslyPasteHTML
       if (quillEditors[k]) {
-        quillEditors[k].root.innerHTML = value;
+        quillEditors[k].setContents([]); // Pulisci prima
+        quillEditors[k].dangerouslyPasteHTML(value);
       } else {
         el.value = value;
       }
