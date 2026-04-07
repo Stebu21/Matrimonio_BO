@@ -491,6 +491,14 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
   transition: background 0.3s, color 0.3s;
 }
 .btn-rsvp:hover { background: var(--amber); color: var(--charcoal); }
+.btn-calendar {
+  width: 100%; padding: 0.8rem; background: none;
+  border: 1px solid rgba(201,138,46,0.5); color: var(--amber);
+  font-family: 'Josefin Sans', sans-serif; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+.btn-calendar:hover { background: rgba(201,138,46,0.2); color: var(--amber-light); }
 .rsvp-msg {
   text-align: center; margin-top: 1rem; font-size: 0.85rem;
   color: var(--amber-light); display: none;
@@ -678,6 +686,7 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
       <label for="rsvpNote">Note, allergie o intolleranze</label>
       <textarea id="rsvpNote" placeholder="Scrivi qui..."></textarea>
       <button type="submit" class="btn-rsvp">Conferma presenza</button>
+      <button type="button" class="btn-calendar" onclick="addToCalendar()" style="margin-top: 0.5rem;">📅 Aggiungi a calendario</button>
     </form>
     <p class="rsvp-msg" id="rsvpMsg"></p>
   </div>
@@ -963,6 +972,63 @@ async function init() {
 }
 
 init();
+
+// ── Calendario ──
+function addToCalendar() {
+  if (!S.data_matrimonio) {
+    alert('Data matrimonio non disponibile');
+    return;
+  }
+
+  // Data e ora: 11:30 (cerimonia)
+  const date = new Date(S.data_matrimonio);
+  const startTime = new Date(date);
+  startTime.setHours(11, 30, 0, 0);
+  const endTime = new Date(startTime);
+  endTime.setHours(15, 0, 0, 0); // Fino alle 15:00
+
+  // Formatta data/ora per iCal (YYYYMMDDTHHMMSS)
+  const formatDateTime = (d) => {
+    return d.getFullYear() +
+      String(d.getMonth() + 1).padStart(2, '0') +
+      String(d.getDate()).padStart(2, '0') + 'T' +
+      String(d.getHours()).padStart(2, '0') +
+      String(d.getMinutes()).padStart(2, '0') +
+      String(d.getSeconds()).padStart(2, '0');
+  };
+
+  // Descrizione da timeline
+  const timelineDesc = timeline.map(t => `${t.ora}: ${t.titolo}`).join('\n');
+  const description = timelineDesc + '\n\n' + (S.footer_testo || '');
+
+  // iCal format
+  const ical = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Matrimonio Sofia & Stefano//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Matrimonio Sofia & Stefano
+X-WR-TIMEZONE:Europe/Rome
+BEGIN:VEVENT
+UID:matrimonio-2026@sofiaestafano.it
+DTSTART:${formatDateTime(startTime)}
+DTEND:${formatDateTime(endTime)}
+SUMMARY:Matrimonio Sofia Macchi & Stefano Bulgheroni
+LOCATION:Villa Morotti, Daverio (VA) - Parcheggio
+DESCRIPTION:${description.replace(/\n/g, '\\n')}
+END:VEVENT
+END:VCALENDAR`;
+
+  // Scarica file .ics
+  const blob = new Blob([ical], { type: 'text/calendar;charset=utf-8' });
+  const link = document.createElement('a');
+  link.setAttribute('href', URL.createObjectURL(blob));
+  link.setAttribute('download', `Matrimonio-Sofia-Stefano.ics`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 </script>
 </body>
 </html>
