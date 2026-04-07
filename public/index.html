@@ -975,59 +975,12 @@ init();
 
 // ── Calendario ──
 function addToCalendar() {
-  if (!S.data_matrimonio) {
-    alert('Data matrimonio non disponibile');
-    return;
-  }
-
-  // Data e ora: 11:30 (cerimonia)
-  const date = new Date(S.data_matrimonio);
-  const startTime = new Date(date);
-  startTime.setHours(11, 30, 0, 0);
-  const endTime = new Date(startTime);
-  endTime.setHours(15, 0, 0, 0); // Fino alle 15:00
-
-  // Formatta data/ora per iCal (YYYYMMDDTHHMMSS)
-  const formatDateTime = (d) => {
-    return d.getFullYear() +
-      String(d.getMonth() + 1).padStart(2, '0') +
-      String(d.getDate()).padStart(2, '0') + 'T' +
-      String(d.getHours()).padStart(2, '0') +
-      String(d.getMinutes()).padStart(2, '0') +
-      String(d.getSeconds()).padStart(2, '0');
-  };
-
-  // Descrizione da timeline
-  const timelineDesc = timeline.map(t => `${t.ora}: ${t.titolo}`).join('\n');
-  const description = timelineDesc + '\n\n' + (S.footer_testo || '');
-
-  // iCal format
-  const ical = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Matrimonio Sofia & Stefano//EN
-CALSCALE:GREGORIAN
-METHOD:PUBLISH
-X-WR-CALNAME:Matrimonio Sofia & Stefano
-X-WR-TIMEZONE:Europe/Rome
-BEGIN:VEVENT
-UID:matrimonio-2026@sofiaestafano.it
-DTSTART:${formatDateTime(startTime)}
-DTEND:${formatDateTime(endTime)}
-SUMMARY:Matrimonio Sofia Macchi & Stefano Bulgheroni
-LOCATION:Villa Morotti, Daverio (VA) - Parcheggio
-DESCRIPTION:${description.replace(/\n/g, '\\n')}
-END:VEVENT
-END:VCALENDAR`;
-
-  // Scarica file .ics (mobile-friendly con data: URL)
-  const encodedIcal = encodeURIComponent(ical);
-  const link = document.createElement('a');
-  link.setAttribute('href', `data:text/calendar;charset=utf-8,${encodedIcal}`);
-  link.setAttribute('download', `Matrimonio-Sofia-Stefano.ics`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  // Apri il file .ics direttamente dal server.
+  // Ogni OS lo gestisce nativamente:
+  // - iOS Safari: dialog "Aggiungi al Calendario"
+  // - Android: apre Google Calendar
+  // - Windows: apre Outlook/Calendario Windows
+  window.location.href = '/api/calendar';
 }
 </script>
 </body>
