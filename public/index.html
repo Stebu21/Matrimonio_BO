@@ -238,46 +238,162 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 }
 
 /* ── Timeline ── */
-.timeline-section { background: var(--bg); }
-.timeline-list {
-  position: relative; display: flex; flex-direction: row; justify-content: space-between;
-  align-items: center; gap: 1rem; max-width: 1000px; margin: 0 auto; padding: 3rem 2rem;
+#leaves-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0;
 }
-.timeline-line {
-  position: absolute; left: 0; right: 0; top: 50%; height: 2px;
-  background: var(--amber); opacity: 0.3; transform: translateY(-50%); z-index: 1;
-}
-.tl-item {
-  position: relative; flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 1.2rem 1rem; text-align: center; z-index: 2;
-}
-.tl-item:nth-child(odd) .tl-desc { order: 3; }
-.tl-item:nth-child(even) .tl-desc { order: 3; margin-top: 0.8rem; }
-.tl-dot {
-  position: relative; width: 14px; height: 14px; background: var(--amber);
-  border-radius: 50%; border: 3px solid var(--bg); margin-bottom: 0.8rem;
-  order: 2;
-}
-.tl-ora {
-  font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;
-  color: var(--rust); font-style: italic; margin-bottom: 0.3rem; order: 1;
-}
-.tl-titolo {
-  font-weight: 400; font-size: 0.85rem; text-transform: uppercase;
-  letter-spacing: 0.1em; margin: 0.2rem 0; color: var(--charcoal); order: 2;
-}
-.tl-desc { font-size: 0.75rem; color: var(--text-mid); max-width: 100px; }
 
-@media (max-width: 800px) {
-  .timeline-list { flex-direction: column; }
-  .timeline-line { height: 100%; width: 2px; left: 50%; top: 0; bottom: 0; right: auto; }
-  .tl-item { width: 45%; padding: 1.2rem 1.5rem; }
-  .tl-item:nth-child(odd) { margin-left: 0; text-align: right; }
-  .tl-item:nth-child(even) { margin-left: 55%; text-align: left; }
-  .tl-dot { position: absolute; margin-bottom: 0; top: 1.5rem; }
-  .tl-item:nth-child(odd) .tl-dot { right: -28px; }
-  .tl-item:nth-child(even) .tl-dot { left: -28px; }
-  .tl-ora, .tl-titolo, .tl-desc { text-align: inherit; }
+.timeline-section { background: var(--bg); position: relative; z-index: 1; }
+
+.timeline-list {
+  position: relative; max-width: 700px; margin: 0 auto; padding: 2rem 0;
+}
+
+.timeline-list::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--amber-light) 0px,
+    var(--amber-light) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  transform: translateX(-50%);
+}
+
+.wt-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 48px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.wt-event:last-child { margin-bottom: 0; }
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wt-event--left .wt-event__content  { margin-right: calc(50% + 28px); margin-left: 0; text-align: right; }
+.wt-event--left .wt-event__icon     { left: calc(50% - 14px); }
+
+.wt-event--right .wt-event__content { margin-left: calc(50% + 28px); margin-right: 0; text-align: left; }
+.wt-event--right .wt-event__icon    { left: calc(50% - 14px); }
+
+.wt-event__icon {
+  position: absolute;
+  top: 14px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--amber);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.wt-event:hover .wt-event__icon {
+  background: var(--amber-light);
+  transform: scale(1.15);
+}
+
+.wt-event__icon-inner {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+.wt-event__content {
+  background: var(--cream);
+  border: 0.8px solid var(--amber-light);
+  border-radius: 12px;
+  padding: 16px 20px 14px;
+  width: calc(50% - 44px);
+  position: relative;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.wt-event:hover .wt-event__content {
+  border-color: var(--amber);
+  transform: translateY(-2px);
+}
+
+.wt-event--left .wt-event__content::after {
+  content: '';
+  position: absolute;
+  top: 20px; right: -8px;
+  width: 8px; height: 8px;
+  background: var(--cream);
+  border-top: 0.8px solid var(--amber-light);
+  border-right: 0.8px solid var(--amber-light);
+  transform: rotate(45deg);
+}
+
+.wt-event--right .wt-event__content::after {
+  content: '';
+  position: absolute;
+  top: 20px; left: -8px;
+  width: 8px; height: 8px;
+  background: var(--cream);
+  border-bottom: 0.8px solid var(--amber-light);
+  border-left: 0.8px solid var(--amber-light);
+  transform: rotate(45deg);
+}
+
+.wt-event__time {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.wt-event__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--charcoal);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.wt-event__place {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text-mid);
+  font-style: italic;
+}
+
+@media (max-width: 580px) {
+  .timeline-list::before { left: 20px; }
+
+  .wt-event--left .wt-event__content,
+  .wt-event--right .wt-event__content {
+    margin-left: 52px;
+    margin-right: 0;
+    text-align: left;
+    width: calc(100% - 52px);
+  }
+
+  .wt-event--left .wt-event__icon,
+  .wt-event--right .wt-event__icon { left: 6px; }
+
+  .wt-event--left .wt-event__content::after { display: none; }
+  .wt-event--right .wt-event__content::after {
+    left: -8px; top: 20px;
+    border-bottom: 0.8px solid var(--amber-light);
+    border-left: 0.8px solid var(--amber-light);
+    border-top: none; border-right: none;
+  }
 }
 
 /* ── Location ── */
@@ -379,6 +495,8 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 </style>
 </head>
 <body>
+
+<canvas id="leaves-canvas"></canvas>
 
 <!-- ── Navbar ── -->
 <nav class="navbar">
@@ -661,14 +779,19 @@ function updateCarousel() {
 // ── Render functions ──
 function renderTimeline(items) {
   const list = document.getElementById('timelineList');
-  list.innerHTML = '<div class="timeline-line"></div>';
-  items.forEach(t => {
+  list.innerHTML = '';
+  items.forEach((t, i) => {
+    const side = i % 2 === 0 ? 'left' : 'right';
     const div = document.createElement('div');
-    div.className = 'tl-item';
-    div.innerHTML = `<div class="tl-ora">${t.ora}</div>
-      <div class="tl-dot"></div>
-      <div class="tl-titolo">🍂 ${t.titolo} 🍂</div>
-      <div class="tl-desc">${t.descrizione || ''}</div>`;
+    div.className = `wt-event wt-event--${side}`;
+    div.style.animationDelay = `${i * 0.12}s`;
+    div.innerHTML = `
+      <div class="wt-event__icon"><div class="wt-event__icon-inner"></div></div>
+      <div class="wt-event__content">
+        <p class="wt-event__time">${t.ora}</p>
+        <p class="wt-event__title">${t.titolo}</p>
+        ${t.descrizione ? `<p class="wt-event__place">${t.descrizione}</p>` : ''}
+      </div>`;
     list.appendChild(div);
   });
 }
@@ -766,6 +889,86 @@ document.getElementById('navHamburger').addEventListener('click', () => {
 document.querySelectorAll('.nav-links a').forEach(a => {
   a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
 });
+
+// ── Canvas Foglie Autunnali ──
+const LEAF_COUNT = 28;
+const canvas = document.getElementById('leaves-canvas');
+const ctx = canvas.getContext('2d');
+const LEAF_COLORS = ['#d85a30', '#993c1d', '#ba7517', '#ef9f27', '#fac775', '#7a2e10', '#c4622d', '#e8a020'];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function drawLeaf(ctx, r, color) {
+  ctx.beginPath();
+  ctx.moveTo(0, -r);
+  ctx.bezierCurveTo(r * 0.8, -r * 0.4, r * 0.9, r * 0.4, 0, r);
+  ctx.bezierCurveTo(-r * 0.9, r * 0.4, -r * 0.8, -r * 0.4, 0, -r);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(0, -r * 0.85);
+  ctx.lineTo(0, r * 0.85);
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+}
+
+function createLeaf() {
+  return {
+    x: Math.random() * window.innerWidth,
+    y: -20 - Math.random() * 200,
+    r: 6 + Math.random() * 10,
+    color: LEAF_COLORS[Math.floor(Math.random() * LEAF_COLORS.length)],
+    speed: 0.6 + Math.random() * 1.0,
+    drift: (Math.random() - 0.5) * 0.8,
+    spin: (Math.random() - 0.5) * 0.04,
+    angle: Math.random() * Math.PI * 2,
+    swing: 0,
+    swingSpeed: 0.02 + Math.random() * 0.02,
+    swingAmp: 30 + Math.random() * 40,
+    opacity: 0.55 + Math.random() * 0.35,
+  };
+}
+
+const leaves = Array.from({ length: LEAF_COUNT }, createLeaf);
+leaves.forEach((l, i) => {
+  if (i < LEAF_COUNT * 0.6) {
+    l.y = Math.random() * window.innerHeight;
+  }
+});
+
+function animateLeaves() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  leaves.forEach(l => {
+    l.swing += l.swingSpeed;
+    l.x += Math.sin(l.swing) * l.swingAmp * 0.015 + l.drift;
+    l.y += l.speed;
+    l.angle += l.spin;
+
+    if (l.y > canvas.height + 30) {
+      Object.assign(l, createLeaf());
+      l.x = Math.random() * canvas.width;
+      l.y = -20;
+    }
+
+    ctx.save();
+    ctx.globalAlpha = l.opacity;
+    ctx.translate(l.x, l.y);
+    ctx.rotate(l.angle);
+    drawLeaf(ctx, l.r, l.color);
+    ctx.restore();
+  });
+
+  requestAnimationFrame(animateLeaves);
+}
+
+animateLeaves();
 
 // ── Init ──
 async function init() {
