@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Matrimonio</title>
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -174,6 +175,18 @@ td { padding: 0.6rem; border-bottom: 1px solid var(--cream); }
   transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 9999;
 }
 .toast.show { transform: translateY(0); opacity: 1; }
+
+/* ── TinyMCE styling ── */
+#s_storia_testo, #s_regalo_testo, #s_rsvp_testo {
+  display: none; /* nasconde il textarea, TinyMCE lo rimpiazza */
+}
+.tox { font-family: 'Josefin Sans', sans-serif !important; }
+.tox .tox-tbtn, .tox .tox-tbtn--select { color: var(--text-dark) !important; }
+.tox .tox-toolbar, .tox .tox-toolbar__primary { background: var(--cream) !important; border: 1px solid rgba(201,138,46,0.3) !important; border-bottom: none; }
+.tox .tox-editor-header { border-radius: 4px 4px 0 0; }
+.tox .tox-edit-area { border: 1px solid rgba(201,138,46,0.3) !important; border-top: none; background: #fff !important; }
+.tox .tox-edit-area__iframe { background: #fff !important; }
+.tox-tinymce { border-radius: 4px !important; }
 
 @media (max-width: 600px) {
   .item-row, .item-row.loc-row { grid-template-columns: 1fr; }
@@ -456,6 +469,11 @@ async function loadAll() {
   renderTimeline();
   renderLocations();
   document.getElementById('carouselToggle').checked = settings.carousel_visibile !== '0';
+
+  // Inizializza TinyMCE per i textarea di testo
+  if (!tinymce.activeEditor) {
+    initTinyMCE();
+  }
 }
 
 // ── Tabs ──
@@ -615,7 +633,14 @@ const settingsKeys = [
 function populateSettingsForm() {
   settingsKeys.forEach(k => {
     const el = document.getElementById('s_' + k);
-    if (el) el.value = settings[k] || '';
+    if (el) {
+      const value = settings[k] || '';
+      el.value = value;
+      // Sincronizza TinyMCE se è inizializzato
+      if (tinymce.get('s_' + k)) {
+        tinymce.get('s_' + k).setContent(value);
+      }
+    }
   });
 }
 
@@ -623,11 +648,48 @@ async function saveAllSettings() {
   const obj = {};
   settingsKeys.forEach(k => {
     const el = document.getElementById('s_' + k);
-    if (el) obj[k] = el.value;
+    if (el) {
+      // Se TinyMCE è inizializzato, prendi il contenuto da lì, altrimenti da el.value
+      if (tinymce.get('s_' + k)) {
+        obj[k] = tinymce.get('s_' + k).getContent();
+      } else {
+        obj[k] = el.value;
+      }
+    }
   });
   await api('/admin/settings', { method: 'POST', body: obj });
   settings = await api('/settings');
   toast('Impostazioni salvate');
+}
+
+function initTinyMCE() {
+  tinymce.init({
+    selector: '#s_storia_testo, #s_regalo_testo, #s_rsvp_testo',
+    license_key: 'gpl',
+    plugins: 'lists link image table code help wordcount',
+    toolbar: 'undo redo | formatselect | bold italic underline strikethrough | bullist numlist | link image table | removeformat help',
+    menubar: false,
+    branding: false,
+    height: 300,
+    content_css: false,
+    body_class: 'tinymce-body',
+    skin: 'oxide-dark',
+    content_style: `
+      body {
+        font-family: 'Josefin Sans', sans-serif;
+        font-weight: 300;
+        color: var(--text-dark);
+        background: var(--bg);
+        line-height: 1.6;
+      }
+      p { margin: 0.5em 0; }
+    `,
+    setup: (editor) => {
+      editor.on('blur', () => {
+        document.getElementById(editor.id).value = editor.getContent();
+      });
+    }
+  });
 }
 
 // ═══════════════════════════════
