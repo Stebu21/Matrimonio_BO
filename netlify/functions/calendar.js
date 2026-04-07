@@ -1,4 +1,4 @@
-const { supabase } = require('./_shared/supabase');
+const supabase = require('./_shared/supabase');
 
 exports.handler = async () => {
   try {
