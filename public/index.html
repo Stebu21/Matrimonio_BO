@@ -239,38 +239,45 @@ h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-st
 
 /* ── Timeline ── */
 .timeline-section { background: var(--bg); }
-.timeline-list { position: relative; max-width: 700px; margin: 0 auto; padding: 2rem 0; }
+.timeline-list {
+  position: relative; display: flex; flex-direction: row; justify-content: space-between;
+  align-items: center; gap: 1rem; max-width: 1000px; margin: 0 auto; padding: 3rem 2rem;
+}
 .timeline-line {
-  position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
-  background: var(--amber); opacity: 0.3; transform: translateX(-50%);
+  position: absolute; left: 0; right: 0; top: 50%; height: 2px;
+  background: var(--amber); opacity: 0.3; transform: translateY(-50%); z-index: 1;
 }
 .tl-item {
-  position: relative; width: 45%; padding: 1.2rem 1.5rem;
-  margin-bottom: 2rem;
+  position: relative; flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 1.2rem 1rem; text-align: center; z-index: 2;
 }
-.tl-item:nth-child(odd) { margin-left: 0; text-align: right; }
-.tl-item:nth-child(even) { margin-left: 55%; text-align: left; }
+.tl-item:nth-child(odd) .tl-desc { order: 3; }
+.tl-item:nth-child(even) .tl-desc { order: 3; margin-top: 0.8rem; }
 .tl-dot {
-  position: absolute; top: 1.5rem; width: 12px; height: 12px;
-  background: var(--amber); border-radius: 50%;
-  border: 3px solid var(--bg);
+  position: relative; width: 14px; height: 14px; background: var(--amber);
+  border-radius: 50%; border: 3px solid var(--bg); margin-bottom: 0.8rem;
+  order: 2;
 }
-.tl-item:nth-child(odd) .tl-dot { right: -28px; }
-.tl-item:nth-child(even) .tl-dot { left: -28px; }
 .tl-ora {
-  font-family: 'Cormorant Garamond', serif; font-size: 1.6rem;
-  color: var(--rust); font-style: italic;
+  font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;
+  color: var(--rust); font-style: italic; margin-bottom: 0.3rem; order: 1;
 }
 .tl-titolo {
-  font-weight: 400; font-size: 0.95rem; text-transform: uppercase;
-  letter-spacing: 0.1em; margin: 0.2rem 0;
+  font-weight: 400; font-size: 0.85rem; text-transform: uppercase;
+  letter-spacing: 0.1em; margin: 0.2rem 0; color: var(--charcoal); order: 2;
 }
-.tl-desc { font-size: 0.8rem; color: var(--text-mid); }
+.tl-desc { font-size: 0.75rem; color: var(--text-mid); max-width: 100px; }
 
-@media (max-width: 600px) {
-  .timeline-line { left: 16px; }
-  .tl-item { width: calc(100% - 50px); margin-left: 50px !important; text-align: left !important; }
-  .tl-dot { left: -40px !important; right: auto !important; }
+@media (max-width: 800px) {
+  .timeline-list { flex-direction: column; }
+  .timeline-line { height: 100%; width: 2px; left: 50%; top: 0; bottom: 0; right: auto; }
+  .tl-item { width: 45%; padding: 1.2rem 1.5rem; }
+  .tl-item:nth-child(odd) { margin-left: 0; text-align: right; }
+  .tl-item:nth-child(even) { margin-left: 55%; text-align: left; }
+  .tl-dot { position: absolute; margin-bottom: 0; top: 1.5rem; }
+  .tl-item:nth-child(odd) .tl-dot { right: -28px; }
+  .tl-item:nth-child(even) .tl-dot { left: -28px; }
+  .tl-ora, .tl-titolo, .tl-desc { text-align: inherit; }
 }
 
 /* ── Location ── */
@@ -658,9 +665,9 @@ function renderTimeline(items) {
   items.forEach(t => {
     const div = document.createElement('div');
     div.className = 'tl-item';
-    div.innerHTML = `<div class="tl-dot"></div>
-      <div class="tl-ora">${t.ora}</div>
-      <div class="tl-titolo">${t.titolo}</div>
+    div.innerHTML = `<div class="tl-ora">${t.ora}</div>
+      <div class="tl-dot"></div>
+      <div class="tl-titolo">🍂 ${t.titolo} 🍂</div>
       <div class="tl-desc">${t.descrizione || ''}</div>`;
     list.appendChild(div);
   });
