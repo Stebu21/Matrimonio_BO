@@ -41,7 +41,7 @@ exports.handler = async () => {
     const startTime = new Date(date);
     startTime.setHours(11, 30, 0, 0);
     const endTime = new Date(startTime);
-    endTime.setHours(15, 0, 0, 0);
+    endTime.setHours(21, 0, 0, 0);
 
     const timelineDesc = timeline.map(t => `${t.ora}: ${t.titolo}`).join('\\n');
     const description = timelineDesc + '\\n\\n' + (S.footer_testo || '');
