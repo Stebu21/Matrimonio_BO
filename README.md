@@ -51,8 +51,8 @@ Compila il file `.env`:
 |----------------------------|----------------------------------------------|
 | `SUPABASE_URL`             | URL del progetto Supabase                    |
 | `SUPABASE_SERVICE_ROLE_KEY`| Service role key (da Settings > API)         |
-| `ADMIN_USER`               | Username admin (default: `sposi`)            |
-| `ADMIN_PASS`               | Password admin (default: `sofia2026`)        |
+| `ADMIN_USER`               | Username admin (default: `admin`)            |
+| `ADMIN_PASS`               | Password admin (default: `admin`)            |
 | `SESSION_SECRET`           | Stringa segreta per firmare i JWT            |
 
 ### 5. Avvia il server
@@ -71,8 +71,8 @@ Questo avvia `netlify dev`, che serve i file statici e le functions localmente.
 ### Credenziali admin di default
 
 ```
-Username: sposi
-Password: sofia2026
+Username: admin
+Password: admin
 ```
 
 La password puo' essere cambiata dal pannello admin (tab Impostazioni).
@@ -95,7 +95,7 @@ Vai in **Site settings > Environment variables** e aggiungi:
 ```
 SUPABASE_URL             = https://xxxxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY = eyJhbG...
-ADMIN_USER               = sposi
+ADMIN_USER               = admin
 ADMIN_PASS               = <la-tua-password>
 SESSION_SECRET           = <stringa-casuale-lunga>
 ```

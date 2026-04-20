@@ -16,7 +16,7 @@ exports.handler = async (event) => {
     .eq('key', 'admin_pass_override')
     .single();
 
-  const currentPass = (data && data.value) || process.env.ADMIN_PASS || 'sofia2026';
+  const currentPass = (data && data.value) || process.env.ADMIN_PASS || 'admin';
 
   if (oldPassword !== currentPass) {
     return json({ error: 'Password attuale non corretta' }, 400);

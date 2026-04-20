@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(xargs kill:*)",
+      "Bash(powershell:*)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill:*)",
+      "Bash(kill -9 38008)"
+    ]
+  }
+}

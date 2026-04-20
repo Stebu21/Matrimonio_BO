@@ -7,7 +7,7 @@ exports.handler = async (event) => {
   }
 
   const { username, password } = JSON.parse(event.body || '{}');
-  const validUser = process.env.ADMIN_USER || 'sposi';
+  const validUser = process.env.ADMIN_USER || 'admin';
 
   // Check for password override in DB
   const { data } = await supabase
@@ -16,7 +16,7 @@ exports.handler = async (event) => {
     .eq('key', 'admin_pass_override')
     .single();
 
-  const validPass = (data && data.value) || process.env.ADMIN_PASS || 'sofia2026';
+  const validPass = (data && data.value) || process.env.ADMIN_PASS || 'admin';
 
   if (username === validUser && password === validPass) {
     const token = signToken();
